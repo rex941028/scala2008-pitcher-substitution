@@ -1,0 +1,30 @@
+__pycache__/
+*.pyc
+
+# raw downloads (rebuilt by src/data_prep.py); rosters (*.ROS) stay in git
+data/raw/*.zip
+data/raw/*/*.EV?
+data/raw/*/TEAM*
+data/processed/*.csv
+data/processed/*.log
+tools/
+paper/
+
+# large or regenerated outputs
+results/e3_decisions.csv
+results/e3_run.log
+results/docx_figs/
+
+# Office temp files
+~$*
+
+# personal documents and their builders (public copies live in docs/)
+/分析報告.md
+/視覺化報告.html
+/Scala2008換投模型_白話說明.docx
+/本機筆記.md
+experiments/build_docx.py
+experiments/build_visual_report.py
+experiments/build_visual_data.py
+experiments/visual_report_template.html
+experiments/update_docx_fields.ps1

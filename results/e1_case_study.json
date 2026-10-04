@@ -1,0 +1,106 @@
+{
+ "situation": {
+  "game": "CLE200604250",
+  "inning": 6,
+  "half": 0,
+  "outs": 0,
+  "bases": 0,
+  "fld_lead": 2,
+  "plays_tomorrow": true,
+  "innings_left": 4.0,
+  "date": "2006-04-25"
+ },
+ "batter": "Mike Lowell",
+ "on_deck": "Willie Harris",
+ "actual_change": true,
+ "actual_pitcher": "Jason Davis",
+ "runs_rest_of_inning": 1,
+ "ahp": {
+  "paper/distributive": {
+   "global": {
+    "Jake Westbrook": 0.42196491643892997,
+    "Jason Davis": 0.24308139390150896,
+    "Scott Sauerbeck": 0.33495368965956096
+   },
+   "best": "Jake Westbrook"
+  },
+  "paper/ideal": {
+   "global": {
+    "Jake Westbrook": 0.40972433634700633,
+    "Jason Davis": 0.24375070614736438,
+    "Scott Sauerbeck": 0.34652495750562934
+   },
+   "best": "Jake Westbrook"
+  },
+  "round/distributive": {
+   "global": {
+    "Jake Westbrook": 0.401936307971273,
+    "Jason Davis": 0.23988830327376076,
+    "Scott Sauerbeck": 0.35817538875496624
+   },
+   "best": "Jake Westbrook"
+  },
+  "round/ideal": {
+   "global": {
+    "Jake Westbrook": 0.38726760445533925,
+    "Jason Davis": 0.24134450342794098,
+    "Scott Sauerbeck": 0.37138789211671974
+   },
+   "best": "Jake Westbrook"
+  },
+  "exact/distributive": {
+   "global": {
+    "Jake Westbrook": 0.4170919569740995,
+    "Jason Davis": 0.23760079824607117,
+    "Scott Sauerbeck": 0.3453072447798294
+   },
+   "best": "Jake Westbrook"
+  },
+  "exact/ideal": {
+   "global": {
+    "Jake Westbrook": 0.40129372589732215,
+    "Jason Davis": 0.23917414044697427,
+    "Scott Sauerbeck": 0.35953213365570363
+   },
+   "best": "Jake Westbrook"
+  }
+ },
+ "markov": {
+  "Jake Westbrook": {
+   "id": "westj001",
+   "exp_runs": 0.48081963962611335,
+   "p0": 0.7453349449265882,
+   "wp": 0.8006446772098395
+  },
+  "Jason Davis": {
+   "id": "davij005",
+   "exp_runs": 0.5604069990242021,
+   "p0": 0.7232157998801143,
+   "wp": 0.7902164496415189
+  },
+  "Scott Sauerbeck": {
+   "id": "saues001",
+   "exp_runs": 0.5802816964088338,
+   "p0": 0.7149840649287607,
+   "wp": 0.7876730922005203
+  }
+ },
+ "markov_best": "Jake Westbrook",
+ "full_pool": {
+  "ahp_best": "Rafael Betancourt",
+  "markov_best": "Rafael Betancourt",
+  "pool": [
+   "Jake Westbrook",
+   "Rafael Betancourt",
+   "Jason Davis",
+   "Danny Graves",
+   "Jeremy Guthrie",
+   "Matt Miller",
+   "Guillermo Mota",
+   "Rafael Perez",
+   "Scott Sauerbeck",
+   "Brian Slocum",
+   "Bob Wickman"
+  ]
+ }
+}

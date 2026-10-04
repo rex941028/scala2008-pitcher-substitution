@@ -1,0 +1,1177 @@
+<title>Scala 換投模型檢驗</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<style>
+/* Layout: one reading column (~46rem) on scorebook-grey paper; figures break out to 68rem.
+   The one loud element is the hero scoreboard (a manual ballpark board, same in both themes). */
+:root {
+  --bg: #f1f3ef;
+  --surface: #fcfcfb;
+  --ink: #16212b;
+  --ink-2: #46515b;
+  --muted: #6b747c;
+  --rule: #d8dcd5;
+  --grid: #e3e5df;
+  --axis: #c3c6bd;
+  --accent: #b03f2c;
+  --accent-soft: #f6e3de;
+  --board: #1e3a2d;
+  --board-edge: #13271e;
+  --board-ink: #f3f0e4;
+  --board-dim: #9db4a6;
+  --board-hi: #ffd166;
+  --board-bad: #ff9b85;
+  --c-state: #eb6834;
+  --c-batter: #1baf7a;
+  --c-pitcher: #eda100;
+  --c-bullpen: #e87ba4;
+  --c-ahp: #4a3aa7;
+  --c-mk: #008300;
+  --c-ref: #a9ada6;
+  --c-ref-2: #6f736c;
+  --div-pos: #2a78d6;
+  --div-neg: #e34948;
+  --div-mid: #ecede8;
+  --good: #0ca30c;
+  --warn: #fab219;
+  --crit: #d03b3b;
+  --f-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --f-note: "LXGW WenKai TC", "Kaiti TC", "DFKai-SB", "Noto Sans TC", serif;
+  --f-board: "Barlow Condensed", "Arial Narrow", "Noto Sans TC", sans-serif;
+  --f-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --s-1: 0.25rem; --s-2: 0.5rem; --s-3: 0.75rem; --s-4: 1rem; --s-5: 1.5rem; --s-6: 2rem; --s-7: 3rem; --s-8: 4.5rem;
+  --t-xs: 0.78rem; --t-sm: 0.875rem; --t-md: 1rem; --t-lg: 1.2rem; --t-xl: 1.55rem; --t-2xl: 2.1rem; --t-3xl: clamp(2.2rem, 5vw, 3.2rem);
+  --radius: 6px;
+  --read: 46rem;
+  --wide: 68rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1312; --surface: #1a1a19; --ink: #eef0ec; --ink-2: #c3c7bf; --muted: #8f978f;
+    --rule: #2e3330; --grid: #2a2d2b; --axis: #3d423f; --accent: #f08a74; --accent-soft: #3a211b;
+    --c-state: #d95926; --c-batter: #199e70; --c-pitcher: #c98500; --c-bullpen: #d55181;
+    --c-ahp: #9085e9; --c-mk: #008300; --c-ref: #5d625e; --c-ref-2: #9aa09a;
+    --div-pos: #3987e5; --div-neg: #e66767; --div-mid: #2c2f2d;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1312; --surface: #1a1a19; --ink: #eef0ec; --ink-2: #c3c7bf; --muted: #8f978f;
+  --rule: #2e3330; --grid: #2a2d2b; --axis: #3d423f; --accent: #f08a74; --accent-soft: #3a211b;
+  --c-state: #d95926; --c-batter: #199e70; --c-pitcher: #c98500; --c-bullpen: #d55181;
+  --c-ahp: #9085e9; --c-mk: #008300; --c-ref: #5d625e; --c-ref-2: #9aa09a;
+  --div-pos: #3987e5; --div-neg: #e66767; --div-mid: #2c2f2d;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: var(--t-md); line-height: 1.75; }
+.page { padding-inline: max(16px, 4vw); padding-block: 0 var(--s-8); }
+.wrap { max-width: var(--wide); margin-inline: auto; }
+.read { max-width: var(--read); }
+h1, h2, h3 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: var(--t-3xl); font-weight: 900; letter-spacing: 0.01em; }
+h2 { font-size: var(--t-2xl); font-weight: 900; }
+h3 { font-size: var(--t-lg); font-weight: 700; }
+p { margin: 0; }
+a { color: var(--ink); text-decoration-color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+code, .mono { font-family: var(--f-mono); font-size: 0.9em; }
+.eyebrow { font-size: var(--t-xs); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: var(--t-lg); color: var(--ink-2); }
+.muted { color: var(--muted); }
+.small { font-size: var(--t-sm); }
+.stack { display: flex; flex-direction: column; gap: var(--s-4); }
+.stack-lg { display: flex; flex-direction: column; gap: var(--s-6); }
+
+/* sticky nav */
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(6px); border-bottom: 1px solid var(--rule); margin-inline: calc(-1 * max(16px, 4vw)); padding-inline: max(16px, 4vw); }
+.nav ul { list-style: none; margin: 0 auto; padding: var(--s-2) 0; display: flex; gap: var(--s-1); overflow-x: auto; max-width: var(--wide); scrollbar-width: none; }
+.nav a { display: block; white-space: nowrap; padding: 0.2rem 0.65rem; border-radius: 999px; font-size: var(--t-sm); color: var(--ink-2); text-decoration: none; }
+.nav a:hover { background: var(--grid); color: var(--ink); }
+
+section { padding-block: var(--s-7) 0; scroll-margin-top: 3.2rem; }
+.sec-head { display: flex; flex-direction: column; gap: var(--s-2); margin-bottom: var(--s-5); }
+
+/* hero */
+.hero { padding-block: var(--s-7) var(--s-5); display: grid; gap: var(--s-5); }
+.hero .deck { max-width: 44rem; }
+
+/* the scoreboard */
+.board { background: var(--board); color: var(--board-ink); border: 6px solid var(--board-edge); border-radius: 4px; padding: var(--s-4); overflow-x: auto; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06); }
+.board table { border-collapse: separate; border-spacing: 4px; width: 100%; min-width: 34rem; }
+.board th { font-family: var(--f-board); font-weight: 600; font-size: var(--t-md); letter-spacing: 0.08em; color: var(--board-dim); text-align: center; padding: 0.1rem 0.4rem; }
+.board th.row { text-align: left; font-family: var(--f-body); font-weight: 500; letter-spacing: 0; color: var(--board-ink); font-size: var(--t-sm); white-space: nowrap; }
+.board td { background: var(--board-edge); text-align: center; font-family: var(--f-board); font-weight: 600; font-size: 1.45rem; line-height: 1.2; padding: 0.35rem 0.5rem; border-radius: 2px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.board td small { display: block; font-family: var(--f-body); font-size: 0.68rem; font-weight: 400; color: var(--board-dim); letter-spacing: 0; }
+.board td.hi { color: var(--board-hi); }
+.board td.x { color: var(--board-bad); }
+.board .cap { display: flex; justify-content: space-between; gap: var(--s-4); font-family: var(--f-board); letter-spacing: 0.1em; color: var(--board-dim); font-size: var(--t-sm); margin-bottom: var(--s-2); flex-wrap: wrap; }
+
+.verdict { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: var(--s-4); }
+.verdict > div { border-top: 3px solid var(--ink); padding-top: var(--s-2); min-width: 0; }
+.verdict b { display: block; font-size: var(--t-md); margin-bottom: 0.2rem; }
+
+/* scorer's pencil note */
+.note { font-family: var(--f-note); color: var(--accent); font-size: 1.12rem; line-height: 1.6; border-left: 2px solid var(--accent); padding-left: var(--s-3); max-width: 40rem; }
+
+/* figures */
+.fig { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: var(--s-4); display: flex; flex-direction: column; gap: var(--s-3); min-width: 0; }
+.fig-title { font-weight: 700; font-size: var(--t-md); }
+.fig-sub { font-size: var(--t-sm); color: var(--muted); margin-top: -0.4rem; }
+.chart { width: 100%; min-width: 0; position: relative; }
+.chart svg { display: block; overflow: visible; }
+.chart text { font-family: var(--f-body); }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); gap: var(--s-4); }
+.legend { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-4); font-size: var(--t-sm); color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+.sw { width: 0.8rem; height: 0.8rem; border-radius: 2px; display: inline-block; flex: none; }
+.sw.line { height: 3px; border-radius: 2px; width: 1rem; }
+details.data { font-size: var(--t-sm); }
+details.data summary { cursor: pointer; color: var(--muted); width: fit-content; }
+.tbl-wrap { overflow-x: auto; }
+table.t { border-collapse: collapse; width: 100%; font-size: var(--t-sm); font-variant-numeric: tabular-nums; }
+table.t th, table.t td { padding: 0.35rem 0.6rem; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+table.t th { font-weight: 700; color: var(--ink-2); white-space: nowrap; }
+table.t td.n, table.t th.n { text-align: right; }
+
+/* tooltip */
+#tip { position: fixed; z-index: 50; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--rule); border-radius: 6px; padding: 0.45rem 0.6rem; font-size: var(--t-sm); line-height: 1.45; box-shadow: 0 6px 20px rgba(0,0,0,0.12); max-width: 18rem; }
+#tip b { display: block; font-size: var(--t-md); }
+#tip .row { display: flex; align-items: center; gap: 0.45rem; }
+
+/* pipeline */
+.pipe { display: grid; gap: var(--s-3); }
+.lane { display: flex; align-items: stretch; gap: var(--s-2); flex-wrap: wrap; }
+.step { flex: 1 1 11rem; min-width: 0; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: var(--s-3); display: flex; flex-direction: column; gap: 0.3rem; text-decoration: none; color: var(--ink); }
+.step:hover { border-color: var(--ink-2); }
+.step .num { font-family: var(--f-board); font-weight: 700; font-size: var(--t-lg); color: var(--muted); letter-spacing: 0.05em; }
+.step b { font-size: var(--t-md); }
+.step p { font-size: var(--t-sm); color: var(--ink-2); line-height: 1.55; }
+.step code { font-size: 0.75rem; color: var(--muted); }
+.arrow { flex: 0 0 auto; align-self: center; color: var(--muted); font-size: 1.2rem; }
+.step.out { flex: 0 1 9rem; background: var(--ink); color: var(--surface); border-color: var(--ink); justify-content: center; }
+.step.out p { color: color-mix(in srgb, var(--surface) 80%, transparent); }
+.step.alt { border-style: dashed; }
+@media (max-width: 640px) { .arrow { transform: rotate(90deg); width: 100%; text-align: center; } .step, .step.out { flex-basis: 100%; } }
+
+/* influence diagram */
+.diagram-wrap { overflow-x: auto; }
+.diagram-wrap svg { width: 100%; min-width: 720px; height: auto; display: block; }
+.toggles { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.chip-btn { font: inherit; font-size: var(--t-sm); line-height: 1.4; white-space: nowrap; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 0.25rem 0.8rem; cursor: pointer; }
+.chip-btn[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.dg-edge { stroke: var(--axis); stroke-width: 1.2; fill: none; }
+.dg-edge.cyc { stroke: var(--accent); stroke-width: 2.4; }
+.dg-node rect { fill: var(--surface); stroke: var(--nc, var(--rule)); stroke-width: 1.4; }
+.dg-node.main rect { stroke: var(--nc, var(--ink-2)); stroke-width: 2.2; fill: color-mix(in srgb, var(--nc, var(--ink-2)) 14%, var(--surface)); }
+.dg-node.dup rect { stroke: var(--accent); stroke-width: 2.4; }
+.dg-node text { font-size: 12px; fill: var(--ink); }
+.dg-node.main text { font-size: 13.5px; font-weight: 700; }
+.dg-node.dim { opacity: 0.25; }
+
+/* case scorebug */
+.bug { display: grid; grid-template-columns: auto 1fr; gap: 0; border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
+.bug .score { background: var(--board); color: var(--board-ink); padding: var(--s-3) var(--s-4); display: grid; gap: 0.2rem; font-family: var(--f-board); min-width: 9rem; }
+.bug .score .ln { display: flex; justify-content: space-between; gap: var(--s-4); font-size: 1.6rem; font-weight: 600; line-height: 1.1; }
+.bug .score .inn { font-size: var(--t-sm); color: var(--board-dim); letter-spacing: 0.1em; }
+.bug .ctx { padding: var(--s-3) var(--s-4); display: grid; gap: 0.2rem; font-size: var(--t-sm); min-width: 0; }
+@media (max-width: 520px) { .bug { grid-template-columns: 1fr; } }
+
+/* pugh heatmap */
+table.pugh { border-collapse: separate; border-spacing: 2px; width: 100%; font-size: var(--t-sm); }
+table.pugh th, table.pugh td { padding: 0.3rem 0.5rem; }
+table.pugh thead th { text-align: center; font-weight: 700; }
+table.pugh thead th:first-child { text-align: left; }
+table.pugh td.v { text-align: center; font-weight: 700; width: 5.5rem; border-radius: 3px; font-variant-numeric: tabular-nums; }
+table.pugh td.pos { background: color-mix(in srgb, var(--div-pos) 24%, var(--surface)); }
+table.pugh td.neg { background: color-mix(in srgb, var(--div-neg) 24%, var(--surface)); }
+table.pugh td.zero { background: var(--div-mid); color: var(--muted); font-weight: 500; }
+table.pugh tr.grp th { text-align: left; padding-top: 0.8rem; font-size: var(--t-md); }
+table.pugh tr.tot td { font-weight: 700; border-top: 1px solid var(--rule); }
+table.pugh tr.tot td.v { background: transparent; }
+
+/* stacked contribution bars (HTML) */
+.stackbars { display: grid; gap: var(--s-3); }
+.sb-row { display: grid; grid-template-columns: 7.5rem 1fr 3.4rem; align-items: center; gap: var(--s-2); }
+.sb-name { font-size: var(--t-sm); font-weight: 700; min-width: 0; }
+.sb-name small { display: block; font-weight: 400; color: var(--muted); }
+.sb-track { display: flex; gap: 2px; height: 20px; min-width: 0; }
+.sb-seg { height: 100%; min-width: 0; }
+.sb-seg:last-child { border-radius: 0 4px 4px 0; }
+.sb-val { font-size: var(--t-sm); font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+.sb-row.win .sb-name::after { content: "  ← 建議"; color: var(--accent); font-weight: 700; }
+
+/* weight lab */
+.lab { display: grid; grid-template-columns: minmax(0, 20rem) minmax(0, 1fr); gap: var(--s-5); }
+@media (max-width: 760px) { .lab { grid-template-columns: 1fr; } }
+.ctrl { display: grid; gap: var(--s-3); }
+.slider { display: grid; grid-template-columns: 1fr auto; gap: 0.1rem var(--s-2); align-items: center; font-size: var(--t-sm); }
+.slider label { display: flex; align-items: center; gap: 0.4rem; font-weight: 700; }
+.slider output { font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.slider input { grid-column: 1 / -1; width: 100%; }
+.presets { display: flex; flex-wrap: wrap; gap: var(--s-1); }
+select { font: inherit; font-size: var(--t-sm); padding: 0.35rem 0.5rem; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); color: var(--ink); width: 100%; }
+.winner { font-size: var(--t-lg); font-weight: 900; }
+
+/* rank reversal */
+.rr-chips { display: flex; flex-wrap: wrap; gap: var(--s-1); }
+.flag { display: inline-flex; align-items: center; gap: 0.35rem; font-size: var(--t-sm); font-weight: 700; padding: 0.15rem 0.6rem; border-radius: 999px; border: 1px solid var(--rule); }
+.flag.bad { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+
+/* consistency mini graphic */
+.tri { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: var(--s-2); }
+.tri > div { border: 1px solid var(--rule); border-radius: var(--radius); padding: var(--s-3); background: var(--surface); font-size: var(--t-sm); }
+.tri .big { font-family: var(--f-board); font-size: 2rem; font-weight: 700; line-height: 1; }
+.tri .bad .big { color: var(--accent); }
+
+/* stat tiles */
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: var(--s-3); }
+.tile { border-top: 1px solid var(--rule); padding-top: var(--s-2); }
+.tile .v { font-size: var(--t-2xl); font-weight: 700; line-height: 1.15; }
+.tile .l { font-size: var(--t-sm); color: var(--muted); }
+
+/* unit strips */
+.units { display: grid; gap: var(--s-2); }
+.u-row { display: grid; grid-template-columns: 7.5rem 1fr 3rem; gap: var(--s-2); align-items: center; font-size: var(--t-sm); }
+.u-dots { display: flex; flex-wrap: wrap; gap: 3px; min-width: 0; }
+.u-dots i { width: 10px; height: 10px; border-radius: 2px; background: var(--grid); display: block; }
+.u-dots i.on { background: var(--ink-2); }
+
+/* scorecard */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr)); gap: var(--s-4); }
+.card { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: var(--s-4); display: flex; flex-direction: column; gap: var(--s-3); min-width: 0; }
+.card header { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--s-2); }
+.card .role { font-size: var(--t-sm); color: var(--muted); }
+.card ul { margin: 0; padding-left: 1.1rem; font-size: var(--t-sm); line-height: 1.6; display: grid; gap: 0.25rem; }
+.card h4 { margin: 0; font-size: var(--t-sm); letter-spacing: 0.08em; color: var(--ink-2); }
+.state { display: inline-flex; align-items: center; gap: 0.35rem; white-space: nowrap; font-size: var(--t-xs); font-weight: 700; padding: 0.15rem 0.55rem; border-radius: 999px; background: var(--div-mid); color: var(--ink); }
+.state i { width: 0.55rem; height: 0.55rem; border-radius: 50%; display: inline-block; }
+.state.ok i { background: var(--good); }
+.state.mid i { background: var(--warn); }
+.state.no i { background: var(--crit); }
+
+ol.errs { margin: 0; padding-left: 1.3rem; display: grid; gap: var(--s-2); }
+ol.errs li::marker { font-weight: 700; color: var(--accent); }
+.filelist { display: grid; grid-template-columns: minmax(0, 17rem) minmax(0, 1fr); gap: 0.2rem var(--s-4); font-size: var(--t-sm); }
+.filelist code { overflow-wrap: anywhere; }
+@media (max-width: 560px) { .filelist { grid-template-columns: 1fr; } .filelist dd { margin-bottom: var(--s-2); } }
+.filelist dt, .filelist dd { margin: 0; }
+footer { margin-top: var(--s-8); padding-top: var(--s-4); border-top: 1px solid var(--rule); font-size: var(--t-sm); color: var(--muted); display: grid; gap: var(--s-2); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+html { scroll-behavior: smooth; }
+</style>
+
+<div class="page">
+<nav class="nav" aria-label="章節"><ul>
+  <li><a href="#top">總覽</a></li><li><a href="#pipeline">模型流程</a></li><li><a href="#diagram">影響圖</a></li>
+  <li><a href="#weights">權重</a></li><li><a href="#case">論文案例</a></li><li><a href="#lab">權重實驗室</a></li>
+  <li><a href="#reversal">排序反轉</a></li><li><a href="#consistency">一致性</a></li><li><a href="#season">全季回測</a></li>
+  <li><a href="#scorecard">各模型優劣</a></li><li><a href="#errors">論文錯誤</a></li><li><a href="#files">檔案</a></li>
+</ul></nav>
+
+<div class="wrap">
+<header class="hero" id="top">
+  <div class="stack">
+    <span class="eyebrow">Scala (2008) · ASEM · 以 2006 MLB 重跑</span>
+    <h1>Scala 換投模型檢驗</h1>
+    <p class="lede deck">Scala 用 AHP（層級分析法）決定該換哪一位投手。我把論文裡的五個模型全部寫成程式，用 2006 年 MLB 賽前可得的真實數據重跑。這一頁用圖說明每個模型怎麼運作、測出了什麼，以及各自的優缺點。</p>
+  </div>
+  <div class="board" role="region" aria-label="檢驗結果記分板">
+    <div class="cap"><span>檢驗結果</span><span>黃字 = 該列表現最好</span></div>
+    <table>
+      <thead><tr><th class="row" scope="col">檢驗項目</th><th scope="col">AHP（論文）</th><th scope="col">MARKOV 基準</th><th scope="col">對照</th></tr></thead>
+      <tbody id="board-body"></tbody>
+    </table>
+  </div>
+  <div class="verdict">
+    <div><b>結構完整、好溝通</b><span class="small">影響圖把 38 個考量因素列得很清楚，AHP 每一步都攤得開，每次決策只要 1.8 ms。</span></div>
+    <div><b>答案取決於沒公開的評分</b><span class="small">照論文文字重建後，得不到論文案例的答案，而且換一個「算平均」的門檻，答案就變了。</span></div>
+    <div><b>實戰沒有勝過簡單法則</b><span class="small">全季 38,114 個決策點：換投時機遠不如只看用球數，換誰也沒贏過「先看左右、再看 ERA」。</span></div>
+  </div>
+</header>
+
+<section id="pipeline">
+  <div class="sec-head read">
+    <span class="eyebrow">五個模型</span>
+    <h2>模型怎麼串起來</h2>
+    <p>論文主模型是一條四步的流水線，最後輸出「全域權重最高的投手」。第五個模型是論文拿來比較的 Markov 方法，我做成簡化版當基準。點任一步可以跳到對應的圖。</p>
+  </div>
+  <div class="pipe">
+    <div class="lane" aria-label="AHP 流程">
+      <a class="step" href="#diagram"><span class="num">模型 1</span><b>影響圖</b><p>38 個因素、58 條箭頭，歸成 4 個準則群。</p><code>influence_diagram.py</code></a>
+      <span class="arrow" aria-hidden="true">→</span>
+      <a class="step" href="#weights"><span class="num">模型 3</span><b>文獻頻率權重</b><p>各因素在 Hirotsu &amp; Wright 論文被提到幾次 → 4 個準則的權重。</p><code>criteria_weights.py</code></a>
+      <span class="arrow" aria-hidden="true">→</span>
+      <a class="step" href="#case"><span class="num">模型 4</span><b>Pugh chart</b><p>每位候選在 32 個子準則給 +1 / 0 / −1，總分差換成 1–9 分的兩兩比較。</p><code>pugh_chart.py</code></a>
+      <span class="arrow" aria-hidden="true">→</span>
+      <a class="step" href="#lab"><span class="num">模型 2</span><b>AHP 引擎</b><p>特徵向量求權重、檢查一致性 CR、加權合成。</p><code>ahp_core.py</code></a>
+      <span class="arrow" aria-hidden="true">→</span>
+      <div class="step out"><b>建議換誰</b><p>全域權重最高者；不是場上投手就換。</p></div>
+    </div>
+    <div class="lane" aria-label="Markov 流程">
+      <a class="step alt" href="#season"><span class="num">模型 5 · 基準</span><b>Markov 鏈（Hirotsu &amp; Wright 式）</b><p>打者 × 投手的事件機率（分左右）→ 24 個壘包出局狀態 → 本半局失分分布 → 勝率表。</p><code>markov_model.py</code></a>
+      <span class="arrow" aria-hidden="true">→</span>
+      <div class="step out"><b>建議換誰</b><p>讓防守方勝率最高的投手。</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="diagram">
+  <div class="sec-head read">
+    <span class="eyebrow">模型 1 · Exhibit 1</span>
+    <h2>影響圖：38 個因素，但有 8 個循環</h2>
+    <p>我逐條箭頭轉錄論文的影響圖。它把換投要考慮的事情列得很完整。但正式的影響圖必須是無環圖，這張圖有 7 組雙向箭頭、形成 8 個循環，所以沒辦法拿來求解，後面的 AHP 也只用到它的「分群」。</p>
+  </div>
+  <div class="fig">
+    <div class="toggles" role="group" aria-label="標示">
+      <button class="chip-btn" id="tg-cyc" aria-pressed="true">標出 8 個循環</button>
+      <button class="chip-btn" id="tg-dup" aria-pressed="false">標出和「左右手」有關的 9 個節點</button>
+    </div>
+    <div class="legend" id="dg-legend"></div>
+    <div class="diagram-wrap"><svg id="dg" viewBox="0 0 1000 760" role="img" aria-label="Scala 影響圖，38 個節點分成 4 個準則群"></svg></div>
+    <p class="small muted">方框粗邊 = 準則群的主節點。紅色箭頭 = 形成循環的關係。滑過節點看英文原名。</p>
+  </div>
+  <p class="note" style="margin-top:var(--s-4)">同一件事（左右手對決）被拆成 9 個節點，進到 Pugh chart 後就被重複計分好幾次。</p>
+</section>
+
+<section id="weights">
+  <div class="sec-head read">
+    <span class="eyebrow">模型 3 · Exhibit 2</span>
+    <h2>權重：四捨五入把差距放大了</h2>
+    <p>論文用「被文獻提到幾次」決定 4 個準則的份量，再把比例換成 Saaty 的 1–9 分。唯一的例子是 20.59 ÷ 30.88 = 0.667，被當成 1/3（「稍微重要」）。照這個規則換算，原本接近的四個權重被拉開成 12.5% 和 37.5% 兩檔。</p>
+  </div>
+  <div class="fig">
+    <div class="fig-title">四個準則的權重</div>
+    <div class="fig-sub">灰色 = 文獻次數的原始比例；彩色 = 套用論文換算規則之後。標＊的兩群（場上投手、牛棚）次數論文沒公開，只知道合計 16.5，這裡用重建值 10 / 6.5。</div>
+    <div class="legend"><span><i class="sw" style="background:var(--c-ref)"></i>文獻原始比例</span><span><i class="sw" style="background:var(--ink-2)"></i>論文換算後（顏色 = 準則）</span></div>
+    <div class="chart" id="ch-weights"></div>
+    <details class="data"><summary>數字表</summary><div class="tbl-wrap" id="tb-weights"></div></details>
+  </div>
+</section>
+
+<section id="case">
+  <div class="sec-head read">
+    <span class="eyebrow">E1 · 論文案例</span>
+    <h2>論文案例：重建後的答案不是 Davis</h2>
+    <p>論文唯一的例子：2006 年 4 月 25 日紅襪作客印地安人。先發 Westbrook 投完 5 局、印地安人 4:2 領先，6 局上第一位打者是右打的 Mike Lowell。候選是讓 Westbrook 續投、右投 Jason Davis、左投 Scott Sauerbeck。論文說 AHP 選 Davis，和總教練 Eric Wedge 的決定一樣。</p>
+  </div>
+  <div class="stack-lg">
+    <div class="bug" id="bug"></div>
+    <div class="fig">
+      <div class="fig-title">三位候選：賽前可得數據（已向聯盟平均收縮）</div>
+      <div class="tbl-wrap" id="tb-cands"></div>
+    </div>
+    <div class="fig">
+      <div class="fig-title">Pugh chart：32 個子準則的 +1 / 0 / −1</div>
+      <div class="fig-sub">藍 = +1（高於平均，對防守方有利），紅 = −1，灰 = 0（平均或無法判定）。論文沒公開逐項評分，這是本研究預先定好的規則算出來的。</div>
+      <div class="tbl-wrap"><table class="pugh" id="pugh"></table></div>
+    </div>
+    <div class="grid-2">
+      <div class="fig">
+        <div class="fig-title">AHP 全域權重（論文換算規則）</div>
+        <div class="fig-sub">每段 = 準則權重 × 該準則下的相對優劣。</div>
+        <div class="legend" id="lg-crit"></div>
+        <div class="stackbars" id="sb-case"></div>
+      </div>
+      <div class="fig">
+        <div class="fig-title">Markov 基準：防守方勝率</div>
+        <div class="fig-sub">只算到本半局結束，再接聯盟平均勝率表。</div>
+        <div class="chart" id="ch-case-mk"></div>
+        <details class="data"><summary>數字表（含本半局失分分布）</summary><div class="tbl-wrap" id="tb-case-mk"></div></details>
+      </div>
+    </div>
+    <p class="note">論文答案 Davis；重建的 AHP 和 Markov 都選 Westbrook 續投。若把當晚 10 位可用牛棚全列進來，兩個模型都改選 Betancourt。實際上 Davis 上場，這半局失 1 分。</p>
+  </div>
+</section>
+
+<section id="lab">
+  <div class="sec-head read">
+    <span class="eyebrow">E2 · 互動</span>
+    <h2>權重實驗室：決定答案的是評分，不是權重</h2>
+    <p>拖動四個準則的權重，看 AHP 的建議會不會變。再切換「評分規則」，看同一場比賽換一種合理的讀法會怎樣。右下方算的是：這組評分規則之下，把所有可能的權重組合都試一遍，每位投手勝出的比例。</p>
+  </div>
+  <div class="fig lab">
+    <div class="ctrl">
+      <div class="presets" role="group" aria-label="權重預設">
+        <button class="chip-btn" data-preset="paper">論文換算後</button>
+        <button class="chip-btn" data-preset="literature">文獻原始比例</button>
+        <button class="chip-btn" data-preset="equal">四個一樣重</button>
+      </div>
+      <div id="sliders" class="stack"></div>
+      <div>
+        <label for="variant" class="small" style="font-weight:700">評分規則</label>
+        <select id="variant"></select>
+      </div>
+    </div>
+    <div class="stack">
+      <div><span class="small muted">目前建議</span><div class="winner" id="lab-winner"></div></div>
+      <div class="stackbars" id="sb-lab"></div>
+      <div class="fig-title" style="margin-top:var(--s-3)">所有權重組合中，各投手勝出的比例</div>
+      <div class="chart" id="ch-lab-share"></div>
+    </div>
+  </div>
+  <p class="note" style="margin-top:var(--s-4)">基準評分下，Davis 在所有權重組合中都贏不了。只有把「算平均」的容忍帶放寬一倍，Davis 才會勝出。</p>
+</section>
+
+<section id="reversal">
+  <div class="sec-head read">
+    <span class="eyebrow">E2 · 排序反轉</span>
+    <h2>多列一位候選，原本三人的順序就可能變</h2>
+    <p>AHP 的已知弱點：加入一個新選項，會改變原本選項之間的排名。選一位當晚也可用的牛棚加進候選名單，看 Westbrook、Davis、Sauerbeck 三人的順序。</p>
+  </div>
+  <div class="fig">
+    <div class="rr-chips" id="rr-chips" role="group" aria-label="加入哪一位投手"></div>
+    <div id="rr-flag"></div>
+    <div class="chart" id="ch-rr"></div>
+    <p class="small muted" id="rr-sum"></p>
+  </div>
+</section>
+
+<section id="consistency">
+  <div class="sec-head read">
+    <span class="eyebrow">E2 · 一致性</span>
+    <h2>Pugh 換算出來的矩陣，常常不合格</h2>
+    <p>AHP 要求兩兩比較大致一致（CR ≤ 0.10）。但 Pugh 的規則是「差 1 分 → 3，差 2 分 → 5」，這本身就不一致：</p>
+  </div>
+  <div class="stack">
+    <div class="tri">
+      <div><span class="small muted">A（+2 分）比 B（+1 分）</span><div class="big">3</div><span class="small">差 1 分 → 稍微好</span></div>
+      <div><span class="small muted">B（+1 分）比 C（0 分）</span><div class="big">3</div><span class="small">差 1 分 → 稍微好</span></div>
+      <div class="bad"><span class="small muted">A 比 C</span><div class="big">5</div><span class="small">規則給 5；要一致應該是 3 × 3 = 9</span></div>
+    </div>
+    <div class="grid-2">
+      <div class="fig">
+        <div class="fig-title">CR &gt; 0.10（不合格）的比例</div>
+        <div class="fig-sub">前三列：每位候選在一個準則下總分取 −4…+4 的所有組合；最後一列：全季回測中至少有一個不合格矩陣的決策點。</div>
+        <div class="chart" id="ch-cr"></div>
+      </div>
+      <div class="fig">
+        <div class="fig-title">論文說的比較次數對不對</div>
+        <div class="tbl-wrap"><table class="t"><thead><tr><th>候選數</th><th class="n">論文</th><th class="n">實際（6 + 4 × n(n−1)/2）</th></tr></thead>
+        <tbody><tr><td>3</td><td class="n">18</td><td class="n">18</td></tr><tr><td>4</td><td class="n" style="color:var(--accent);font-weight:700">26</td><td class="n">30</td></tr><tr><td>5</td><td class="n">46</td><td class="n">46</td></tr></tbody></table></div>
+        <p class="small muted">4 位候選那一格論文算錯了。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="season">
+  <div class="sec-head read">
+    <span class="eyebrow">E3 · 2006 全季回測</span>
+    <h2>全季回測：38,114 個決策點</h2>
+    <p>AL 主場（有 DH）的 1,132 場比賽，第 6 局起的每個打席都是一個決策點。兩個模型在每個決策點只用賽前數據和這場比賽到目前為止的資訊，評估「場上投手 + 當天可用牛棚」。</p>
+  </div>
+  <div class="stack-lg">
+    <div class="tiles" id="tiles-season"></div>
+
+    <div class="stack">
+      <h3>什麼時候該換：模型幾乎每個打席都說要換</h3>
+      <div class="grid-2">
+        <div class="fig">
+          <div class="fig-title">各局「說要換」的比例</div>
+          <div class="fig-sub">模型的規則：最好的選擇不是場上投手就換。</div>
+          <div class="legend" id="lg-inn"></div>
+          <div class="chart" id="ch-inn"></div>
+          <details class="data"><summary>數字表</summary><div class="tbl-wrap" id="tb-inn"></div></details>
+        </div>
+        <div class="fig">
+          <div class="fig-title">能不能分辨「總教練會換」的時機（AUC）</div>
+          <div class="fig-sub">0.5 = 亂猜，1 = 完全分得開。橫線 = 95% 信賴區間（依比賽重抽 1,000 次）。</div>
+          <div class="chart" id="ch-auc"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stack">
+      <h3>換誰：比亂猜好，但沒贏過一行就寫得完的法則</h3>
+      <div class="fig">
+        <div class="fig-title">第一名推薦和總教練實際選的是同一人（5,524 次換投）</div>
+        <div class="fig-sub">隨機猜 = 平均 1 ÷ 可用牛棚數。</div>
+        <div class="chart" id="ch-top1"></div>
+      </div>
+    </div>
+
+    <div class="stack">
+      <h3>模型的評價，能預測實際失分嗎</h3>
+      <p class="read small">做法：看模型對「實際上場那位投手」的評價，和這半局剩下實際失了幾分（扣掉同壘包出局狀態的聯盟平均）。AHP 的分數只比較投手；Markov 也用「只比投手」的版本才公平。</p>
+      <div class="grid-2">
+        <div class="fig">
+          <div class="fig-title">相關係數（Spearman ρ，越負越好）</div>
+          <div class="fig-sub">0 = 完全無關。</div>
+          <div class="chart" id="ch-rho"></div>
+        </div>
+        <div class="fig">
+          <div class="fig-title">依模型評價分五組：剩餘失分比預期多幾分</div>
+          <div class="fig-sub">1 = 模型評價最差的五分之一。正值 = 失分比聯盟平均多。</div>
+          <div class="legend" id="lg-q"></div>
+          <div class="chart" id="ch-q"></div>
+          <details class="data"><summary>數字表</summary><div class="tbl-wrap" id="tb-q"></div></details>
+        </div>
+      </div>
+      <p class="note">兩個模型都抓到一點真的訊號，但很弱。評價最好和最差的五分之一只差 0.12～0.15 分／半局。單一打席本來就很難預測。</p>
+    </div>
+
+    <div class="stack">
+      <h3>牛棚角色：模型會把同一位投手用到底</h3>
+      <div class="grid-2">
+        <div class="fig">
+          <div class="fig-title">各隊換投中，最常被選的那一位佔多少</div>
+          <div class="chart" id="ch-conc"></div>
+        </div>
+        <div class="fig">
+          <div class="fig-title">6–7 局與 8 局後的首選是同一人（30 隊）</div>
+          <div class="fig-sub">實心 = 該隊兩段局數最常用的是同一位投手。</div>
+          <div class="units" id="units-same"></div>
+        </div>
+      </div>
+      <p class="note">總教練會分中繼、布局、終結者；兩個模型只看眼前，6 局就會把終結者叫上來。</p>
+    </div>
+  </div>
+</section>
+
+<section id="scorecard">
+  <div class="sec-head read">
+    <span class="eyebrow">總結</span>
+    <h2>各模型的優劣</h2>
+    <p>圓點代表結論：綠 = 可以放心借用，黃 = 有條件使用，紅 = 不建議拿來做決策。</p>
+  </div>
+  <div class="cards" id="cards"></div>
+</section>
+
+<section id="errors">
+  <div class="sec-head read">
+    <span class="eyebrow">論文本身</span>
+    <h2>論文的錯誤與疏漏</h2>
+  </div>
+  <ol class="errs read">
+    <li><b>比較次數算錯。</b>4 位候選要 30 次兩兩比較，論文寫 26 次。</li>
+    <li><b>比例換算不合 Saaty 量表。</b>0.667（= 1 ÷ 1.5）被當成 1/3；比例 1.5 應該落在「同等」和「稍微重要」之間。文中的「30.39」應為 30.88。</li>
+    <li><b>Pugh 差距 3 和 4 都對應「very strong」（7）</b>，疑為筆誤。</li>
+    <li><b>驗證只有一場比賽</b>，而且只比對「是不是和總教練一樣」，沒有看換投後的結果。</li>
+    <li><b>影響圖有循環</b>，不是正式的影響圖。</li>
+    <li><b>關鍵參數沒公開。</b>場上投手／牛棚的權重與逐項評分只在未公開的技術報告裡，別人無法重現。</li>
+  </ol>
+</section>
+
+
+
+<section id="files">
+  <div class="sec-head read">
+    <span class="eyebrow">原始碼與限制</span>
+    <h2>檔案位置</h2>
+
+    <p class="small">全部在 GitHub：<a href="https://github.com/rex941028/scala2008-pitcher-substitution" target="_blank" rel="noopener">rex941028/scala2008-pitcher-substitution</a></p>
+  </div>
+  <dl class="filelist read">
+    <dt><code>docs/分析報告.md</code></dt><dd>完整文字報告（本頁的來源）</dd>
+    <dt><code>src/influence_diagram.py</code></dt><dd>模型 1：影響圖與結構檢查</dd>
+    <dt><code>src/ahp_core.py</code></dt><dd>模型 2：AHP 引擎</dd>
+    <dt><code>src/criteria_weights.py</code></dt><dd>模型 3：文獻頻率權重</dd>
+    <dt><code>src/pugh_chart.py</code></dt><dd>模型 4：Pugh chart</dd>
+    <dt><code>src/pitcher_ahp.py</code></dt><dd>組合後的 AHP 換投模型（32 個子準則的評分規則）</dd>
+    <dt><code>src/markov_model.py</code></dt><dd>模型 5：Markov 基準</dd>
+    <dt><code>predict.py</code></dt><dd>對 2006 年任一打席做換投預測</dd>
+    <dt><code>experiments/e1…e3</code></dt><dd>三個實驗</dd>
+    <dt><code>results/</code></dt><dd>所有報表與明細（<code>e3_decisions.csv</code> 有 38,114 列）</dd>
+  </dl>
+  <div class="stack read" style="margin-top:var(--s-5)">
+    <h3>本研究的限制</h3>
+    <ul class="small" style="margin:0;padding-left:1.1rem;display:grid;gap:0.3rem">
+      <li>32 個子準則的評分規則是我依節點名稱訂的；作者原始評分可能不同，而答案對此很敏感。</li>
+      <li>每天的可用牛棚名單是推估的，11.2% 的實際換投對象不在推估名單內（已強制加入）。</li>
+      <li>只測 2006 年、只測 DH 比賽；Markov 是簡化版，不是 Hirotsu &amp; Wright 的整場動態規劃。</li>
+      <li>「選到／沒選到模型第一名」的失分差異是描述性的，不是因果效果。</li>
+    </ul>
+  </div>
+  <footer>
+    <span>論文：Natalie M. Scala, <i>Decision Modeling and Applications to Major League Baseball Pitcher Substitution</i>, ASEM 2008。<a href="https://d-scholarship.pitt.edu/concern/generic_works/b658d06a-9611-4710-9411-26ada5b4ad6e" target="_blank" rel="noopener">D-Scholarship@Pitt</a></span>
+    <span>資料：<a href="https://www.retrosheet.org/" target="_blank" rel="noopener">Retrosheet</a> 逐球紀錄，以 <a href="https://github.com/chadwickbureau/chadwick" target="_blank" rel="noopener">Chadwick</a> 轉檔；案例比賽 <a href="https://www.retrosheet.org/boxesetc/2006/B04250CLE2006.htm" target="_blank" rel="noopener">box score</a>。</span>
+  </footer>
+</section>
+</div>
+</div>
+<div id="tip" hidden></div>
+
+<script>
+const DATA = {"weights":{"criteria":["State","Batter","Pitcher","Bullpen"],"totals":{"State":7.0,"Batter":10.5,"Pitcher":10.0,"Bullpen":6.5},"literature":{"State":0.2059,"Batter":0.3088,"Pitcher":0.2941,"Bullpen":0.1912},"paper":{"State":0.125,"Batter":0.375,"Pitcher":0.375,"Bullpen":0.125},"paper_CR":0.0,"round":{"State":0.2463,"Batter":0.2894,"Pitcher":0.2894,"Bullpen":0.175},"round_CR":0.0225,"exact":{"State":0.2059,"Batter":0.3088,"Pitcher":0.2941,"Bullpen":0.1912},"exact_CR":-0.0},"case":{"batter":"Mike Lowell","batter_bats":"R","on_deck":"Willie Harris","on_deck_bats":"L","bench":["Josh Bard (B)","Alex Cora (L)","Dustan Mohr (R)","Wily Mo Pena (R)","J.T. Snow (L)","Adam Stern (L)"],"fld_lead":2,"outs":0,"bases":0,"pitches_today":98,"bf_today":24,"onbase_today":12,"runs_today":2,"typical_pitches":96,"pitchers":[{"id":"westj001","name":"Jake Westbrook","throws":"R","era":4.56,"avg_vs_L":0.269,"avg_vs_R":0.256,"obp":0.312,"dera_L":4.73,"dera_R":4.12,"days_rest":5},{"id":"davij005","name":"Jason Davis","throws":"R","era":4.34,"avg_vs_L":0.274,"avg_vs_R":0.267,"obp":0.341,"dera_L":5.4,"dera_R":4.81,"days_rest":1},{"id":"saues001","name":"Scott Sauerbeck","throws":"L","era":4.17,"avg_vs_L":0.237,"avg_vs_R":0.272,"obp":0.347,"dera_L":4.23,"dera_R":5.53,"days_rest":2}],"actual":"Jason Davis","runs_rest":1,"pugh":[{"criterion":"State","node":12,"label":"上/下半局","ratings":[0,0,0]},{"criterion":"State","node":13,"label":"局數","ratings":[1,0,0]},{"criterion":"State","node":14,"label":"主/客場","ratings":[0,0,0]},{"criterion":"State","node":15,"label":"領先/落後分數","ratings":[-1,0,0]},{"criterion":"State","node":16,"label":"領先或落後","ratings":[-1,0,0]},{"criterion":"State","node":17,"label":"出局數","ratings":[0,0,1]},{"criterion":"State","node":18,"label":"上個半局發生的事","ratings":[0,0,0]},{"criterion":"State","node":19,"label":"壘上跑者","ratings":[0,0,0]},{"criterion":"Batter","node":3,"label":"板凳打者慣用手","ratings":[-1,-1,-1]},{"criterion":"Batter","node":4,"label":"板凳打者打擊率","ratings":[0,0,0]},{"criterion":"Batter","node":5,"label":"板凳打者左右投偏好","ratings":[-1,-1,-1]},{"criterion":"Batter","node":6,"label":"對手可派的代打","ratings":[-1,-1,1]},{"criterion":"Batter","node":7,"label":"下一棒打者","ratings":[-1,-1,1]},{"criterion":"Batter","node":8,"label":"預定打者慣用手","ratings":[1,1,-1]},{"criterion":"Batter","node":10,"label":"預定打者左右投偏好","ratings":[0,0,-1]},{"criterion":"Batter","node":11,"label":"預定打者打擊率","ratings":[1,1,1]},{"criterion":"Pitcher","node":21,"label":"投手慣用手","ratings":[1,1,-1]},{"criterion":"Pitcher","node":22,"label":"投手對左右打防禦率","ratings":[1,0,0]},{"criterion":"Pitcher","node":23,"label":"疲勞","ratings":[-1,1,1]},{"criterion":"Pitcher","node":24,"label":"是否受傷","ratings":[0,0,0]},{"criterion":"Pitcher","node":25,"label":"今日表現（失分）","ratings":[-1,0,0]},{"criterion":"Pitcher","node":26,"label":"投手防禦率","ratings":[0,0,0]},{"criterion":"Pitcher","node":27,"label":"投手一般數據","ratings":[1,-1,-1]},{"criterion":"Pitcher","node":28,"label":"場上投手","ratings":[0,0,0]},{"criterion":"Pitcher","node":30,"label":"投手 DERA","ratings":[1,0,-1]},{"criterion":"Bullpen","node":31,"label":"牛棚休息","ratings":[1,0,1]},{"criterion":"Bullpen","node":32,"label":"牛棚對左右打防禦率","ratings":[0,0,0]},{"criterion":"Bullpen","node":34,"label":"牛棚防禦率","ratings":[0,0,0]},{"criterion":"Bullpen","node":35,"label":"牛棚 DERA","ratings":[0,0,-1]},{"criterion":"Bullpen","node":36,"label":"先發輪值","ratings":[1,1,-1]},{"criterion":"Bullpen","node":37,"label":"後續賽程","ratings":[1,0,0]},{"criterion":"Bullpen","node":38,"label":"牛棚一般數據","ratings":[0,-1,-1]}],"markov":[{"name":"Jake Westbrook","exp_runs":0.481,"p0":0.745,"wp":0.8006,"dist":[0.7453,0.1388,0.0601,0.0558]},{"name":"Jason Davis","exp_runs":0.56,"p0":0.723,"wp":0.7902,"dist":[0.7232,0.1401,0.0661,0.0707]},{"name":"Scott Sauerbeck","exp_runs":0.58,"p0":0.715,"wp":0.7877,"dist":[0.715,0.1417,0.0699,0.0734]}]},"variants":[{"key":"base","label":"基準：本研究預先定好的評分規則","local":{"State":{"w":[0.1047,0.2583,0.637],"CR":0.033,"totals":[-1,0,1]},"Batter":{"w":[0.2,0.2,0.6],"CR":0.0,"totals":[-2,-2,-1]},"Pitcher":{"w":[0.633,0.3043,0.0627],"CR":0.117,"totals":[2,1,-2]},"Bullpen":{"w":[0.772,0.1734,0.0545],"CR":0.18,"totals":[3,0,-2]}}},{"key":"bp0","label":"場上投手在牛棚準則不加分（31/36/37 給 0）","local":{"State":{"w":[0.1047,0.2583,0.637],"CR":0.033,"totals":[-1,0,1]},"Batter":{"w":[0.2,0.2,0.6],"CR":0.0,"totals":[-2,-2,-1]},"Pitcher":{"w":[0.633,0.3043,0.0627],"CR":0.117,"totals":[2,1,-2]},"Bullpen":{"w":[0.4545,0.4545,0.0909],"CR":0.0,"totals":[0,0,-2]}}},{"key":"state0","label":"比賽狀態的情境拆分全給 0（樣本太小）","local":{"State":{"w":[0.3333,0.3333,0.3333],"CR":0.0,"totals":[0,0,0]},"Batter":{"w":[0.2,0.2,0.6],"CR":0.0,"totals":[-2,-2,-1]},"Pitcher":{"w":[0.633,0.3043,0.0627],"CR":0.117,"totals":[2,1,-2]},"Bullpen":{"w":[0.772,0.1734,0.0545],"CR":0.18,"totals":[3,0,-2]}}},{"key":"bench0","label":"對手板凳代打節點 3–6 全給 0","local":{"State":{"w":[0.1047,0.2583,0.637],"CR":0.033,"totals":[-1,0,1]},"Batter":{"w":[0.4286,0.4286,0.1429],"CR":-0.0,"totals":[1,1,0]},"Pitcher":{"w":[0.633,0.3043,0.0627],"CR":0.117,"totals":[2,1,-2]},"Bullpen":{"w":[0.772,0.1734,0.0545],"CR":0.18,"totals":[3,0,-2]}}},{"key":"linear","label":"Pugh 差距改線性換算（差 1→2、差 2→3…）","local":{"State":{"w":[0.1634,0.297,0.5396],"CR":0.008,"totals":[-1,0,1]},"Batter":{"w":[0.25,0.25,0.5],"CR":0.0,"totals":[-2,-2,-1]},"Pitcher":{"w":[0.5695,0.3331,0.0974],"CR":0.021,"totals":[2,1,-2]},"Bullpen":{"w":[0.691,0.2176,0.0914],"CR":0.046,"totals":[3,0,-2]}}},{"key":"tol05","label":"「平均」的容忍帶 ×0.5","local":{"State":{"w":[0.2053,0.0436,0.7511],"CR":0.376,"totals":[1,-4,5]},"Batter":{"w":[0.3333,0.3333,0.3333],"CR":0.0,"totals":[-2,-2,-2]},"Pitcher":{"w":[0.4667,0.4667,0.0667],"CR":0.0,"totals":[1,1,-3]},"Bullpen":{"w":[0.772,0.1734,0.0545],"CR":0.18,"totals":[3,-1,-3]}}},{"key":"tol2","label":"「平均」的容忍帶 ×2","local":{"State":{"w":[0.3333,0.3333,0.3333],"CR":0.0,"totals":[0,0,0]},"Batter":{"w":[0.2,0.2,0.6],"CR":0.0,"totals":[-2,-2,-1]},"Pitcher":{"w":[0.1884,0.7306,0.081],"CR":0.056,"totals":[0,2,-1]},"Bullpen":{"w":[0.7306,0.1884,0.081],"CR":0.056,"totals":[3,1,0]}}}],"rank_reversal":{"base":{"Jake Westbrook":0.422,"Jason Davis":0.2431,"Scott Sauerbeck":0.335},"cases":[{"added":"Rafael Betancourt","scores":{"Jake Westbrook":0.1668,"Jason Davis":0.1196,"Scott Sauerbeck":0.2229,"Rafael Betancourt":0.4906}},{"added":"Danny Graves","scores":{"Jake Westbrook":0.3775,"Jason Davis":0.2418,"Scott Sauerbeck":0.288,"Danny Graves":0.0927}},{"added":"Jeremy Guthrie","scores":{"Jake Westbrook":0.2988,"Jason Davis":0.1675,"Scott Sauerbeck":0.2737,"Jeremy Guthrie":0.26}},{"added":"Matt Miller","scores":{"Jake Westbrook":0.2186,"Jason Davis":0.129,"Scott Sauerbeck":0.2264,"Matt Miller":0.4259}},{"added":"Guillermo Mota","scores":{"Jake Westbrook":0.2389,"Jason Davis":0.1375,"Scott Sauerbeck":0.2273,"Guillermo Mota":0.3963}},{"added":"Rafael Perez","scores":{"Jake Westbrook":0.3497,"Jason Davis":0.1913,"Scott Sauerbeck":0.2276,"Rafael Perez":0.2314}},{"added":"Brian Slocum","scores":{"Jake Westbrook":0.3521,"Jason Davis":0.1869,"Scott Sauerbeck":0.2741,"Brian Slocum":0.1869}},{"added":"Bob Wickman","scores":{"Jake Westbrook":0.2095,"Jason Davis":0.1273,"Scott Sauerbeck":0.2269,"Bob Wickman":0.4364}}]},"diagram":{"nodes":[{"id":1,"en":"Pitcher selection","zh":"投手選擇（目標）","type":"decision","cluster":1},{"id":2,"en":"Pitcher vs. batter matchups","zh":"投打對決","type":"chance","cluster":2},{"id":3,"en":"Bench batters' natural handedness","zh":"板凳打者慣用手","type":"chance","cluster":9},{"id":4,"en":"Bench batters' averages","zh":"板凳打者打擊率","type":"chance","cluster":9},{"id":5,"en":"Bench batters' handedness preference","zh":"板凳打者左右投偏好","type":"chance","cluster":9},{"id":6,"en":"Who the opposing team can PH","zh":"對手可派的代打","type":"chance","cluster":9},{"id":7,"en":"Next scheduled batter","zh":"下一棒打者","type":"chance","cluster":9},{"id":8,"en":"Scheduled batter handedness","zh":"預定打者慣用手","type":"chance","cluster":9},{"id":9,"en":"Scheduled batter's situation","zh":"預定打者狀況","type":"chance","cluster":9},{"id":10,"en":"Scheduled batter's handedness preference","zh":"預定打者左右投偏好","type":"chance","cluster":9},{"id":11,"en":"Scheduled batter's average","zh":"預定打者打擊率","type":"chance","cluster":9},{"id":12,"en":"Top or bottom","zh":"上/下半局","type":"chance","cluster":20},{"id":13,"en":"Inning","zh":"局數","type":"chance","cluster":20},{"id":14,"en":"Home or away","zh":"主/客場","type":"chance","cluster":20},{"id":15,"en":"Number runs ahead / behind","zh":"領先/落後分數","type":"chance","cluster":20},{"id":16,"en":"Behind or ahead","zh":"領先或落後","type":"chance","cluster":20},{"id":17,"en":"Number of outs","zh":"出局數","type":"chance","cluster":20},{"id":18,"en":"Happened in previous half inning","zh":"上個半局發生的事","type":"chance","cluster":20},{"id":19,"en":"Runners on","zh":"壘上跑者","type":"chance","cluster":20},{"id":20,"en":"State of the game","zh":"比賽狀態","type":"chance","cluster":20},{"id":21,"en":"Handedness of pitcher","zh":"投手慣用手","type":"chance","cluster":29},{"id":22,"en":"Pitcher's ERA vs. handedness","zh":"投手對左右打防禦率","type":"chance","cluster":29},{"id":23,"en":"Tiredness","zh":"疲勞","type":"chance","cluster":29},{"id":24,"en":"Injured?","zh":"是否受傷","type":"chance","cluster":29},{"id":25,"en":"How faring: number runs given up","zh":"今日表現（失分）","type":"chance","cluster":29},{"id":26,"en":"Pitcher's ERA","zh":"投手防禦率","type":"chance","cluster":29},{"id":27,"en":"Pitcher's general numbers","zh":"投手一般數據","type":"chance","cluster":29},{"id":28,"en":"Pitcher in the game","zh":"場上投手","type":"decision","cluster":29},{"id":29,"en":"In-game pitcher's situation","zh":"場上投手狀況","type":"chance","cluster":29},{"id":30,"en":"Pitcher's DERA","zh":"投手 DERA","type":"chance","cluster":29},{"id":31,"en":"Bullpen rest","zh":"牛棚休息","type":"decision","cluster":33},{"id":32,"en":"Bullpen ERA vs. handedness","zh":"牛棚對左右打防禦率","type":"chance","cluster":33},{"id":33,"en":"Bullpen specialists available","zh":"可用牛棚專家","type":"decision","cluster":33},{"id":34,"en":"Bullpen ERAs","zh":"牛棚防禦率","type":"chance","cluster":33},{"id":35,"en":"Bullpen DERA","zh":"牛棚 DERA","type":"chance","cluster":33},{"id":36,"en":"Starting rotation","zh":"先發輪值","type":"decision","cluster":33},{"id":37,"en":"Upcoming schedule","zh":"後續賽程","type":"chance","cluster":33},{"id":38,"en":"Bullpen's general numbers","zh":"牛棚一般數據","type":"chance","cluster":33}],"edges":[[1,2],[2,1],[3,5],[3,6],[4,6],[5,4],[5,6],[6,9],[7,6],[8,9],[8,10],[9,2],[9,29],[10,11],[11,9],[12,20],[13,12],[13,20],[14,12],[14,20],[15,16],[15,20],[16,20],[17,20],[18,20],[19,20],[20,2],[21,29],[22,26],[22,29],[23,22],[23,24],[23,29],[24,25],[24,29],[25,24],[25,26],[25,29],[26,29],[26,30],[27,26],[28,29],[29,2],[29,9],[29,28],[29,30],[30,26],[30,29],[31,33],[32,34],[33,2],[34,33],[34,35],[35,34],[36,33],[37,33],[37,36],[38,34]],"two_way":[[1,2],[9,29],[24,25],[26,30],[28,29],[29,30],[34,35]],"cycles":[[1,2],[9,29],[24,25],[26,29,30],[26,30],[28,29],[29,30],[34,35]],"clusters":{"9":[3,4,5,6,7,8,10,11],"20":[12,13,14,15,16,17,18,19],"29":[21,22,23,24,25,26,27,28,30],"33":[31,32,34,35,36,37,38]}},"season_by_inning":[{"inning":"6","n":10050,"actual":0.0764,"ahp":0.9089,"markov":0.9388},{"inning":"7","n":9865,"actual":0.1387,"ahp":0.9051,"markov":0.9038},{"inning":"8","n":9755,"actual":0.1875,"ahp":0.8587,"markov":0.8435},{"inning":"9","n":7126,"actual":0.1939,"ahp":0.7359,"markov":0.6875},{"inning":"10+","n":1318,"actual":0.1684,"ahp":0.6631,"markov":0.5622}],"season":{"games":1132,"decisions":38114,"changes":5569,"change_rate":0.1461,"ahp_sub":0.8542,"mk_sub":0.8453,"cr_bad":0.8398},"timing":{"ahp_ms":1.796955552,"markov_ms":12.8824991787,"errors":0.0,"games":1134.0},"e2":{"cr_share":{"3":0.469,"4":0.395,"5":0.454}},"e3":{"auc":{"ahp":{"v":0.588,"lo":0.581,"hi":0.595},"mk":{"v":0.595,"lo":0.588,"hi":0.602},"pitch":{"v":0.804,"lo":0.795,"hi":0.813}},"top1":{"random":0.185,"ahp":{"v":0.262,"lo":0.251,"hi":0.274},"mk":{"v":0.233,"lo":0.222,"hi":0.245},"simple":{"v":0.28,"lo":0.268,"hi":0.292}},"rho":{"ahp":{"v":-0.034,"lo":-0.048,"hi":-0.021},"mkr":{"v":-0.049,"lo":-0.067,"hi":-0.032},"mk":{"v":-0.02,"lo":-0.038,"hi":-0.002}},"quint":{"ahp":[0.059,0.043,0.005,0.007,-0.061],"mkr":[0.094,0.022,-0.002,-0.002,-0.058],"mk":[0.132,0.038,0.005,-0.028,-0.094]},"conc":{"manager":0.208,"ahp":0.552,"mk":0.648,"simple":0.46},"same":{"manager":2,"ahp":23,"mk":27,"simple":21}}};
+const CRIT = ["State", "Batter", "Pitcher", "Bullpen"];
+const CRIT_ZH = { State: "比賽狀態", Batter: "預定打者", Pitcher: "場上投手", Bullpen: "牛棚" };
+const CRIT_COLOR = { State: "var(--c-state)", Batter: "var(--c-batter)", Pitcher: "var(--c-pitcher)", Bullpen: "var(--c-bullpen)" };
+const CLUSTER_CRIT = { 20: "State", 9: "Batter", 29: "Pitcher", 33: "Bullpen" };
+const SVG = "http://www.w3.org/2000/svg";
+const short = (n) => n.split(" ").slice(-1)[0];
+const pct = (v, d = 1) => (v * 100).toFixed(d) + "%";
+
+function s(tag, attrs, parent) {
+  const n = document.createElementNS(SVG, tag);
+  for (const k in attrs) { if (k === "text") n.textContent = attrs[k]; else n.setAttribute(k, attrs[k]); }
+  if (parent) parent.appendChild(n);
+  return n;
+}
+function hEl(tag, attrs, ...kids) {
+  const n = document.createElement(tag);
+  for (const k in (attrs || {})) { if (k === "text") n.textContent = attrs[k]; else if (k === "style") n.style.cssText = attrs[k]; else n.setAttribute(k, attrs[k]); }
+  for (const c of kids) if (c != null) n.append(c);
+  return n;
+}
+
+/* ---------- tooltip ---------- */
+const tip = document.getElementById("tip");
+function showTip(x, y, lines) {
+  tip.replaceChildren();
+  lines.forEach((ln, i) => {
+    if (i === 0) tip.append(hEl("b", { text: ln }));
+    else if (Array.isArray(ln)) { const r = hEl("div", { class: "row" }); r.append(hEl("i", { class: "sw line", style: "background:" + ln[0] }), document.createTextNode(ln[1])); tip.append(r); }
+    else tip.append(hEl("div", { text: ln }));
+  });
+  tip.hidden = false;
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  let left = x + 14, top = y + 14;
+  if (left + w > window.innerWidth - 8) left = x - w - 14;
+  if (top + h > window.innerHeight - 8) top = y - h - 14;
+  tip.style.left = Math.max(8, left) + "px"; tip.style.top = Math.max(8, top) + "px";
+}
+function hideTip() { tip.hidden = true; }
+function bindTip(node, lines) {
+  node.setAttribute("tabindex", "0");
+  node.addEventListener("pointermove", (e) => showTip(e.clientX, e.clientY, lines()));
+  node.addEventListener("pointerleave", hideTip);
+  node.addEventListener("focus", () => { const r = node.getBoundingClientRect(); showTip(r.right, r.top, lines()); });
+  node.addEventListener("blur", hideTip);
+}
+
+/* ---------- responsive render registry ---------- */
+const ro = new ResizeObserver((entries) => entries.forEach((e) => {
+  const el = e.target, w = Math.round(el.clientWidth);
+  if (w && w !== el._w) { el._w = w; el._draw(); }
+}));
+function chart(id, draw) {
+  const el = document.getElementById(id);
+  el._draw = () => { el.replaceChildren(); draw(el, Math.max(260, el.clientWidth)); };
+  el._w = Math.round(el.clientWidth);
+  el._draw();
+  ro.observe(el);
+  return el;
+}
+function table(targetId, head, rows) {
+  const t = hEl("table", { class: "t" });
+  const tr = hEl("tr");
+  head.forEach((h, i) => tr.append(hEl("th", { text: h, class: i ? "n" : "" })));
+  t.append(hEl("thead", {}, tr));
+  const tb = hEl("tbody");
+  rows.forEach((r) => { const row = hEl("tr"); r.forEach((c, i) => row.append(hEl("td", { text: c, class: i ? "n" : "" }))); tb.append(row); });
+  t.append(tb);
+  document.getElementById(targetId).replaceChildren(t);
+}
+const barPath = (x0, y, w, h, r = 4) => {
+  if (w <= 0.5) return "";
+  r = Math.min(r, w, h / 2);
+  return `M${x0},${y}H${x0 + w - r}Q${x0 + w},${y} ${x0 + w},${y + r}V${y + h - r}Q${x0 + w},${y + h} ${x0 + w - r},${y + h}H${x0}Z`;
+};
+const colPath = (x, base, top, w, r = 4) => {
+  const h = Math.abs(base - top);
+  if (h < 0.5) return "";
+  r = Math.min(r, w / 2, h);
+  if (top < base) return `M${x},${base}V${top + r}Q${x},${top} ${x + r},${top}H${x + w - r}Q${x + w},${top} ${x + w},${top + r}V${base}Z`;
+  return `M${x},${base}V${top - r}Q${x},${top} ${x + r},${top}H${x + w - r}Q${x + w},${top} ${x + w},${top - r}V${base}Z`;
+};
+
+/* horizontal bars: rows {label, v, lo?, hi?, color, sub?} */
+function hbars(el, W, rows, o) {
+  const labW = Math.min(170, W * 0.36), padR = 58, rowH = o.rowH || 38, bh = 18, top = 6, axisH = 26;
+  const H = top + rows.length * rowH + axisH;
+  const svg = s("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}` }, el);
+  const x = (v) => labW + (v - o.min) / (o.max - o.min) * (W - labW - padR);
+  o.ticks.forEach((t) => {
+    s("line", { x1: x(t), x2: x(t), y1: top, y2: H - axisH, style: "stroke:var(--grid);stroke-width:1" }, svg);
+    s("text", { x: x(t), y: H - 8, "text-anchor": "middle", "font-size": 11, style: "fill:var(--muted)", text: o.tickFmt(t) }, svg);
+  });
+  s("line", { x1: x(o.min), x2: x(o.min), y1: top, y2: H - axisH, style: "stroke:var(--axis);stroke-width:1" }, svg);
+  rows.forEach((r, i) => {
+    const y = top + i * rowH + (rowH - bh) / 2;
+    s("text", { x: 0, y: y + bh / 2 + 4, "font-size": 12.5, "font-weight": 700, style: "fill:var(--ink)", text: r.label }, svg);
+    if (r.sub) s("text", { x: 0, y: y + bh / 2 + 18, "font-size": 10.5, style: "fill:var(--muted)", text: r.sub }, svg);
+    const g = s("g", {}, svg);
+    s("rect", { x: labW, y: y - 8, width: W - labW, height: bh + 16, style: "fill:transparent" }, g);
+    s("path", { d: barPath(x(o.min), y, x(r.v) - x(o.min), bh), style: `fill:${r.color}` }, g);
+    let end = x(r.v);
+    if (r.lo != null) {
+      s("line", { x1: x(r.lo), x2: x(r.hi), y1: y + bh / 2, y2: y + bh / 2, style: "stroke:var(--ink);stroke-width:1.5" }, g);
+      [r.lo, r.hi].forEach((v) => s("line", { x1: x(v), x2: x(v), y1: y + 4, y2: y + bh - 4, style: "stroke:var(--ink);stroke-width:1.5" }, g));
+      end = Math.max(end, x(r.hi));
+    }
+    s("text", { x: end + 6, y: y + bh / 2 + 4, "font-size": 12, "font-weight": 700, style: "fill:var(--ink)", text: o.fmt(r.v) }, g);
+    g.setAttribute("role", "img");
+    g.setAttribute("aria-label", `${r.label} ${o.fmt(r.v)}`);
+    bindTip(g, () => [o.fmt(r.v) + (r.lo != null ? `（${o.fmt(r.lo)}–${o.fmt(r.hi)}）` : ""), r.label + (r.sub ? " · " + r.sub : "")]);
+  });
+  if (o.ref != null) {
+    s("line", { x1: x(o.ref), x2: x(o.ref), y1: top - 4, y2: H - axisH, style: "stroke:var(--ink-2);stroke-width:1.5" }, svg);
+    if (o.refLabel) s("text", { x: x(o.ref) + 4, y: top + 6, "font-size": 11, style: "fill:var(--ink-2)", text: o.refLabel }, svg);
+  }
+}
+
+/* dot + CI plot: rows {label, v, lo, hi, color} */
+function dots(el, W, rows, o) {
+  const labW = Math.min(170, W * 0.36), padR = 56, rowH = 40, top = 14, axisH = 26;
+  const H = top + rows.length * rowH + axisH;
+  const svg = s("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}` }, el);
+  const x = (v) => labW + (v - o.min) / (o.max - o.min) * (W - labW - padR);
+  o.ticks.forEach((t) => {
+    s("line", { x1: x(t), x2: x(t), y1: top - 6, y2: H - axisH, style: "stroke:var(--grid);stroke-width:1" }, svg);
+    s("text", { x: x(t), y: H - 8, "text-anchor": "middle", "font-size": 11, style: "fill:var(--muted)", text: o.tickFmt(t) }, svg);
+  });
+  if (o.ref != null) {
+    s("line", { x1: x(o.ref), x2: x(o.ref), y1: top - 8, y2: H - axisH, style: "stroke:var(--ink-2);stroke-width:1.5" }, svg);
+    s("text", { x: x(o.ref) + 4, y: top - 2, "font-size": 11, style: "fill:var(--ink-2)", text: o.refLabel }, svg);
+  }
+  rows.forEach((r, i) => {
+    const cy = top + i * rowH + rowH / 2;
+    s("text", { x: 0, y: cy + 4, "font-size": 12.5, "font-weight": 700, style: "fill:var(--ink)", text: r.label }, svg);
+    const g = s("g", { role: "img", "aria-label": `${r.label} ${o.fmt(r.v)}` }, svg);
+    s("rect", { x: labW, y: cy - 16, width: W - labW, height: 32, style: "fill:transparent" }, g);
+    s("line", { x1: x(r.lo), x2: x(r.hi), y1: cy, y2: cy, style: `stroke:${r.color};stroke-width:2.5;stroke-linecap:round` }, g);
+    s("circle", { cx: x(r.v), cy, r: 6, style: `fill:${r.color};stroke:var(--surface);stroke-width:2` }, g);
+    s("text", { x: x(r.hi) + 8, y: cy + 4, "font-size": 12, "font-weight": 700, style: "fill:var(--ink)", text: o.fmt(r.v) }, g);
+    bindTip(g, () => [`${o.fmt(r.v)}（95% CI ${o.fmt(r.lo)} ~ ${o.fmt(r.hi)}）`, r.label]);
+  });
+}
+
+/* line chart over ordered categories */
+function lines(el, W, d) {
+  const padL = 40, padR = 96, top = 12, bottom = 28, H = 250;
+  const svg = s("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}` }, el);
+  const n = d.x.length;
+  const x = (i) => padL + i * (W - padL - padR) / (n - 1);
+  const y = (v) => top + (1 - v / d.yMax) * (H - top - bottom);
+  d.yTicks.forEach((t) => {
+    s("line", { x1: padL, x2: W - padR, y1: y(t), y2: y(t), style: "stroke:var(--grid);stroke-width:1" }, svg);
+    s("text", { x: padL - 6, y: y(t) + 4, "text-anchor": "end", "font-size": 11, style: "fill:var(--muted)", text: d.fmt(t) }, svg);
+  });
+  s("line", { x1: padL, x2: W - padR, y1: y(0), y2: y(0), style: "stroke:var(--axis);stroke-width:1" }, svg);
+  d.x.forEach((lab, i) => s("text", { x: x(i), y: H - 8, "text-anchor": "middle", "font-size": 11, style: "fill:var(--muted)", text: lab }, svg));
+  d.series.forEach((ser) => {
+    const pts = ser.values.map((v, i) => `${x(i)},${y(v)}`).join(" ");
+    s("polyline", { points: pts, style: `fill:none;stroke:${ser.color};stroke-width:2;stroke-linejoin:round;stroke-linecap:round` }, svg);
+    ser.values.forEach((v, i) => s("circle", { cx: x(i), cy: y(v), r: 4, style: `fill:${ser.color};stroke:var(--surface);stroke-width:2` }, svg));
+    const lv = ser.values[n - 1];
+    s("text", { x: x(n - 1) + 8, y: y(lv) + 4 + (ser.dy || 0), "font-size": 11.5, "font-weight": 700, style: "fill:var(--ink)", text: ser.name }, svg);
+  });
+  const cross = s("line", { y1: top, y2: H - bottom, style: "stroke:var(--ink-2);stroke-width:1", visibility: "hidden" }, svg);
+  const hit = s("rect", { x: padL - 10, y: top, width: W - padL - padR + 20, height: H - top - bottom, style: "fill:transparent", tabindex: 0, role: "img", "aria-label": d.aria }, svg);
+  const at = (i, cx, cy) => { cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("visibility", "visible");
+    showTip(cx, cy, [d.xName(d.x[i]), ...d.series.map((ser) => [ser.color, `${ser.name}　${d.fmt(ser.values[i], 1)}`])]); };
+  hit.addEventListener("pointermove", (e) => { const r = svg.getBoundingClientRect(); const px = (e.clientX - r.left) * (W / r.width);
+    const i = Math.max(0, Math.min(n - 1, Math.round((px - padL) / ((W - padL - padR) / (n - 1))))); at(i, e.clientX, e.clientY); });
+  hit.addEventListener("pointerleave", () => { cross.setAttribute("visibility", "hidden"); hideTip(); });
+  hit.addEventListener("focus", () => { const r = svg.getBoundingClientRect(); at(n - 1, r.right - 60, r.top + 20); });
+  hit.addEventListener("blur", () => { cross.setAttribute("visibility", "hidden"); hideTip(); });
+}
+
+/* grouped columns with a zero baseline (diverging) */
+function columns(el, W, d) {
+  const padL = 46, padR = 8, top = 14, bottom = 28, H = 240;
+  const svg = s("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}` }, el);
+  const y = (v) => top + (d.yMax - v) / (d.yMax - d.yMin) * (H - top - bottom);
+  d.yTicks.forEach((t) => {
+    s("line", { x1: padL, x2: W - padR, y1: y(t), y2: y(t), style: `stroke:${t === 0 ? "var(--axis)" : "var(--grid)"};stroke-width:1` }, svg);
+    s("text", { x: padL - 6, y: y(t) + 4, "text-anchor": "end", "font-size": 11, style: "fill:var(--muted)", text: d.fmt(t) }, svg);
+  });
+  const band = (W - padL - padR) / d.cats.length, k = d.series.length, bw = Math.min(22, (band - 16) / k);
+  d.cats.forEach((c, i) => {
+    const cx = padL + band * i + band / 2;
+    s("text", { x: cx, y: H - 8, "text-anchor": "middle", "font-size": 11, style: "fill:var(--muted)", text: c }, svg);
+    d.series.forEach((ser, j) => {
+      const v = ser.values[i], x0 = cx - (k * bw + (k - 1) * 2) / 2 + j * (bw + 2);
+      const g = s("g", { role: "img", "aria-label": `${ser.name} 第 ${c} 組 ${d.fmt(v)}` }, svg);
+      s("rect", { x: x0 - 1, y: top, width: bw + 2, height: H - top - bottom, style: "fill:transparent" }, g);
+      s("path", { d: colPath(x0, y(0), y(v), bw), style: `fill:${ser.color}` }, g);
+      bindTip(g, () => [d.fmt(v, true), `${ser.name} · ${d.catName(c)}`]);
+    });
+  });
+}
+
+/* HTML stacked bars */
+function stackbars(target, rows, max) {
+  const el = document.getElementById(target);
+  el.replaceChildren();
+  const best = rows.reduce((a, b) => (b.total > a.total ? b : a));
+  rows.forEach((r) => {
+    const row = hEl("div", { class: "sb-row" + (r === best ? " win" : "") });
+    const nm = hEl("div", { class: "sb-name" }, r.label, r.sub ? hEl("small", { text: r.sub }) : null);
+    const track = hEl("div", { class: "sb-track" });
+    r.segs.forEach((sg) => {
+      const seg = hEl("div", { class: "sb-seg", style: `width:${(sg.v / max) * 100}%;background:${sg.color}` });
+      bindTip(seg, () => [sg.v.toFixed(3), `${r.label} · ${sg.label}`]);
+      seg.setAttribute("aria-label", `${sg.label} ${sg.v.toFixed(3)}`);
+      track.append(seg);
+    });
+    row.append(nm, track, hEl("div", { class: "sb-val", text: r.total.toFixed(3) }));
+    el.append(row);
+  });
+}
+
+/* ================= content ================= */
+const E3 = DATA.e3;
+const cands = DATA.case.pitchers;
+
+/* scoreboard */
+(function board() {
+  const rows = [
+    ["重現論文案例（論文答案：Davis）", ["✕", "建議續投", "x"], ["✕", "建議續投", "x"], ["Davis", "總教練實際選擇", ""]],
+    ["換投時機 AUC", [".588", "", ""], [".595", "", ""], [".804", "只看用球數", "hi"]],
+    ["換誰：和總教練同一人", ["26.2%", "", ""], ["23.3%", "", ""], ["28.0%", "左右+ERA 法則", "hi"]],
+    ["評價 vs 實際失分 ρ", ["−.034", "", ""], ["−.049", "只比投手", "hi"], ["—", "", ""]],
+    ["比較矩陣不合格", ["84%", "的決策點", "x"], ["—", "不適用", ""], ["—", "", ""]],
+    ["每次計算", ["1.8", "ms", "hi"], ["12.9", "ms", ""], ["—", "", ""]],
+  ];
+  const tb = document.getElementById("board-body");
+  rows.forEach(([name, ...cells]) => {
+    const tr = hEl("tr", {}, hEl("th", { class: "row", scope: "row", text: name }));
+    cells.forEach(([v, sub, cls]) => tr.append(hEl("td", { class: cls }, v, sub ? hEl("small", { text: sub }) : null)));
+    tb.append(tr);
+  });
+})();
+
+/* influence diagram */
+(function diagram() {
+  const D = DATA.diagram, svg = document.getElementById("dg");
+  const centers = { 1: [9.6, 5.0], 2: [6.8, 5.0], 9: [3.0, 6.3], 20: [8.8, 8.3], 29: [4.6, 1.9], 33: [9.9, 1.9] };
+  const radii = { 9: [2.35, 1.75], 20: [2.2, 1.55], 29: [2.55, 1.45], 33: [2.1, 1.45] };
+  const P = {};
+  const map = ([x, y]) => [(x + 0.5) / 13.5 * 1000, (10.5 - y) / 11 * 760];
+  Object.entries(centers).forEach(([k, c]) => (P[k] = map(c)));
+  Object.entries(D.clusters).forEach(([cl, subs]) => {
+    const [cx, cy] = centers[cl];
+    const [rx, ry] = radii[cl];
+    subs.forEach((n, k) => { const a = 2 * Math.PI * (k + 0.5) / subs.length; P[n] = map([cx + rx * Math.cos(a), cy + ry * Math.sin(a)]); });
+  });
+  const nodes = Object.fromEntries(D.nodes.map((n) => [n.id, n]));
+  const main = new Set([1, 2, 9, 20, 29, 33]);
+  const dup = new Set([3, 5, 7, 8, 10, 11, 21, 22, 32]);
+  const cyc = new Set();
+  D.cycles.forEach((c) => c.forEach((a, i) => cyc.add(a + ">" + c[(i + 1) % c.length])));
+  const defs = s("defs", {}, svg);
+  [["ar", "var(--axis)"], ["arc", "var(--accent)"]].forEach(([id, col]) => {
+    const m = s("marker", { id, viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" }, defs);
+    s("path", { d: "M0,0 L10,5 L0,10 z", style: `fill:${col}` }, m);
+  });
+  const gE = s("g", {}, svg), gN = s("g", {}, svg);
+  const box = {};
+  D.nodes.forEach((n) => {
+    const [x, y] = P[n.id];
+    const g = s("g", { class: "dg-node" + (main.has(n.id) ? " main" : "") + (dup.has(n.id) ? " dupc" : ""), transform: `translate(${x},${y})` }, gN);
+    const rect = s("rect", { rx: n.type === "decision" ? 1 : 10 }, g);
+    const t = s("text", { "text-anchor": "middle", y: 4, text: `${n.id}. ${n.zh}` }, g);
+    const bb = t.getBBox();
+    const w = bb.width + 16, h = bb.height + 8;
+    rect.setAttribute("x", -w / 2); rect.setAttribute("y", -h / 2); rect.setAttribute("width", w); rect.setAttribute("height", h);
+    const crit = CLUSTER_CRIT[n.cluster];
+    if (crit) rect.style.setProperty("--nc", CRIT_COLOR[crit]);
+    if (n.type === "decision") rect.setAttribute("rx", 1);
+    box[n.id] = [w / 2, h / 2];
+    g.setAttribute("role", "img"); g.setAttribute("aria-label", `${n.id}. ${n.zh}（${n.en}）`);
+    bindTip(g, () => [`${n.id}. ${n.zh}`, n.en, n.type === "decision" ? "決策節點（方框）" : "機會節點", crit ? "屬於：" + CRIT_ZH[crit] : n.id === 1 ? "目標" : "連接四群的中心"]);
+    n._g = g;
+  });
+  const edges = [];
+  D.edges.forEach(([a, b]) => {
+    const [x1, y1] = P[a], [x2, y2] = P[b];
+    const dx = x2 - x1, dy = y2 - y1;
+    const [wa, ha] = box[a], [wb, hb] = box[b];
+    const ta = Math.min(wa / Math.abs(dx || 1e-6), ha / Math.abs(dy || 1e-6));
+    const tb = Math.min(wb / Math.abs(dx || 1e-6), hb / Math.abs(dy || 1e-6));
+    const p = s("line", { x1: x1 + dx * ta, y1: y1 + dy * ta, x2: x2 - dx * tb, y2: y2 - dy * tb, class: "dg-edge", "marker-end": "url(#ar)" }, gE);
+    edges.push({ p, cyc: cyc.has(a + ">" + b) });
+  });
+  const legend = document.getElementById("dg-legend");
+  CRIT.forEach((c) => legend.append(hEl("span", {}, hEl("i", { class: "sw", style: `background:transparent;border:2px solid ${CRIT_COLOR[c]}` }), CRIT_ZH[c])));
+  legend.append(hEl("span", {}, hEl("i", { class: "sw", style: "border-radius:1px;border:1.5px solid var(--ink-2)" }), "方框 = 決策節點"), hEl("span", {}, hEl("i", { class: "sw", style: "border-radius:6px;border:1.5px solid var(--ink-2)" }), "圓角 = 機會節點"));
+  const tgC = document.getElementById("tg-cyc"), tgD = document.getElementById("tg-dup");
+  function apply() {
+    const onC = tgC.getAttribute("aria-pressed") === "true", onD = tgD.getAttribute("aria-pressed") === "true";
+    edges.forEach((e) => { const c = onC && e.cyc; e.p.classList.toggle("cyc", c); e.p.setAttribute("marker-end", c ? "url(#arc)" : "url(#ar)"); });
+    D.nodes.forEach((n) => { n._g.classList.toggle("dup", onD && dup.has(n.id)); n._g.classList.toggle("dim", onD && !dup.has(n.id) && !main.has(n.id)); });
+  }
+  [tgC, tgD].forEach((b) => b.addEventListener("click", () => { b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") === "true" ? "false" : "true"); apply(); }));
+  apply();
+})();
+
+/* weights chart: paired bars per criterion */
+chart("ch-weights", (el, W) => {
+  const w = DATA.weights, labW = Math.min(120, W * 0.28), padR = 56, pair = 2 * 18 + 2, gapRow = 18, top = 4, axisH = 26;
+  const H = top + CRIT.length * (pair + gapRow) + axisH;
+  const svg = s("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}` }, el);
+  const max = 0.4, x = (v) => labW + v / max * (W - labW - padR);
+  [0, 0.1, 0.2, 0.3, 0.4].forEach((t) => {
+    s("line", { x1: x(t), x2: x(t), y1: top, y2: H - axisH, style: "stroke:var(--grid);stroke-width:1" }, svg);
+    s("text", { x: x(t), y: H - 8, "text-anchor": "middle", "font-size": 11, style: "fill:var(--muted)", text: pct(t, 0) }, svg);
+  });
+  CRIT.forEach((c, i) => {
+    const y0 = top + i * (pair + gapRow);
+    s("text", { x: 0, y: y0 + pair / 2 + 4, "font-size": 12.5, "font-weight": 700, style: "fill:var(--ink)", text: CRIT_ZH[c] + (c === "Pitcher" || c === "Bullpen" ? "＊" : "") }, svg);
+    [["文獻原始比例", w.literature[c], "var(--c-ref)"], ["論文換算後", w.paper[c], CRIT_COLOR[c]]].forEach(([lab, v, col], j) => {
+      const y = y0 + j * 20, g = s("g", { role: "img", "aria-label": `${CRIT_ZH[c]} ${lab} ${pct(v)}` }, svg);
+      s("rect", { x: labW, y: y - 1, width: W - labW, height: 20, style: "fill:transparent" }, g);
+      s("path", { d: barPath(x(0), y, x(v) - x(0), 18), style: `fill:${col}` }, g);
+      s("text", { x: x(v) + 6, y: y + 13, "font-size": 12, "font-weight": j ? 700 : 400, style: `fill:${j ? "var(--ink)" : "var(--ink-2)"}`, text: pct(v) }, g);
+      bindTip(g, () => [pct(v), `${CRIT_ZH[c]} · ${lab}`]);
+    });
+  });
+  s("line", { x1: x(0), x2: x(0), y1: top, y2: H - axisH, style: "stroke:var(--axis);stroke-width:1" }, svg);
+});
+table("tb-weights", ["準則", "文獻次數", "原始比例", "論文換算後", "四捨五入規則"],
+  CRIT.map((c) => [CRIT_ZH[c] + (c === "Pitcher" || c === "Bullpen" ? "（重建）" : ""), DATA.weights.totals[c].toString(), pct(DATA.weights.literature[c]), pct(DATA.weights.paper[c]), pct(DATA.weights.round[c])]));
+
+/* case scorebug + candidates */
+(function caseSection() {
+  const c = DATA.case;
+  const bug = document.getElementById("bug");
+  bug.append(
+    hEl("div", { class: "score" }, hEl("div", { class: "ln" }, hEl("span", { text: "BOS" }), hEl("span", { text: "2" })), hEl("div", { class: "ln" }, hEl("span", { text: "CLE" }), hEl("span", { text: "4" })), hEl("div", { class: "inn", text: "▲ 6 局上 · 0 出局 · 壘上無人" })),
+    hEl("div", { class: "ctx" },
+      hEl("div", {}, hEl("b", { text: "2006-04-25 · Jacobs Field（克里夫蘭）" })),
+      hEl("div", { text: `打者：${c.batter}（${c.batter_bats === "R" ? "右打" : c.batter_bats}）　下一棒：${c.on_deck}（${c.on_deck_bats === "L" ? "左打" : c.on_deck_bats}）` }),
+      hEl("div", { text: `Westbrook 今天：${c.pitches_today} 球（平常先發約 ${c.typical_pitches} 球）、面對 ${c.bf_today} 人次、被上壘 ${c.onbase_today} 次、失 ${c.runs_today} 分` }),
+      hEl("div", { class: "muted", text: `紅襪板凳：${c.bench.join("、")}` })));
+  const t = hEl("table", { class: "t" });
+  t.append(hEl("thead", {}, hEl("tr", {}, ...["投手", "投", "ERA", "被打擊率 vs 左打", "vs 右打", "被上壘率", "DERA vs 左", "DERA vs 右", "休息天數"].map((h, i) => hEl("th", { text: h, class: i > 1 ? "n" : "" })))));
+  const tb = hEl("tbody");
+  cands.forEach((p, i) => tb.append(hEl("tr", {}, ...[p.name + (i === 0 ? "（場上）" : ""), p.throws === "R" ? "右" : "左", p.era.toFixed(2), p.avg_vs_L.toFixed(3), p.avg_vs_R.toFixed(3), p.obp.toFixed(3), p.dera_L.toFixed(2), p.dera_R.toFixed(2), String(p.days_rest)].map((v, j) => hEl("td", { text: v, class: j > 1 ? "n" : "" })))));
+  t.append(tb);
+  document.getElementById("tb-cands").append(t, hEl("p", { class: "small muted", style: "margin-top:0.4rem", text: "DERA = 以 Markov 模型算出、面對該側打者時每 9 局的期望失分（Hirotsu & Wright 的定義）。" }));
+
+  const pugh = document.getElementById("pugh");
+  pugh.append(hEl("thead", {}, hEl("tr", {}, hEl("th", { text: "子準則" }), ...cands.map((p) => hEl("th", { text: short(p.name) })))));
+  CRIT.forEach((cr) => {
+    const tbd = hEl("tbody");
+    tbd.append(hEl("tr", { class: "grp" }, hEl("th", { colspan: 4 }, hEl("span", { style: "display:inline-flex;align-items:center;gap:0.45rem" }, hEl("i", { class: "sw", style: `background:${CRIT_COLOR[cr]}` }), CRIT_ZH[cr]))));
+    const rows = c.pugh.filter((r) => r.criterion === cr);
+    const tot = [0, 0, 0];
+    rows.forEach((r) => {
+      const tr = hEl("tr", {}, hEl("td", { text: `${r.node}. ${r.label}` }));
+      r.ratings.forEach((v, j) => { tot[j] += v; tr.append(hEl("td", { class: "v " + (v > 0 ? "pos" : v < 0 ? "neg" : "zero"), text: v > 0 ? "+1" : v < 0 ? "−1" : "0" })); });
+      tbd.append(tr);
+    });
+    tbd.append(hEl("tr", { class: "tot" }, hEl("td", { text: "小計" }), ...tot.map((v) => hEl("td", { class: "v", text: (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v) }))));
+    pugh.append(tbd);
+  });
+
+  const lg = document.getElementById("lg-crit");
+  CRIT.forEach((cr) => lg.append(hEl("span", {}, hEl("i", { class: "sw", style: `background:${CRIT_COLOR[cr]}` }), CRIT_ZH[cr])));
+  const base = DATA.variants.find((v) => v.key === "base");
+  stackbars("sb-case", contributions(DATA.weights.paper, base.local), 0.5);
+
+  chart("ch-case-mk", (el, W) => hbars(el, W, c.markov.map((m) => ({ label: short(m.name), sub: `期望失分 ${m.exp_runs.toFixed(2)}`, v: m.wp, color: "var(--c-mk)" })),
+    { min: 0.7, max: 0.82, ticks: [0.7, 0.74, 0.78, 0.82], tickFmt: (t) => pct(t, 0), fmt: (v) => pct(v, 1), rowH: 44 }));
+  table("tb-case-mk", ["投手", "防守方勝率", "期望失分", "失 0 分", "失 1 分", "失 2 分", "失 3 分以上"],
+    c.markov.map((m) => [short(m.name), pct(m.wp), m.exp_runs.toFixed(3), pct(m.dist[0]), pct(m.dist[1]), pct(m.dist[2]), pct(m.dist[3])]));
+})();
+
+function contributions(weights, local) {
+  return cands.map((p, j) => {
+    const segs = CRIT.map((cr) => ({ key: cr, label: CRIT_ZH[cr], v: weights[cr] * local[cr].w[j], color: CRIT_COLOR[cr] }));
+    return { label: short(p.name), sub: j === 0 ? "續投" : (p.throws === "R" ? "右投" : "左投"), segs, total: segs.reduce((a, b) => a + b.v, 0) };
+  });
+}
+
+/* weight lab */
+(function lab() {
+  const presets = {
+    paper: DATA.weights.paper, literature: DATA.weights.literature,
+    equal: { State: 0.25, Batter: 0.25, Pitcher: 0.25, Bullpen: 0.25 },
+  };
+  const box = document.getElementById("sliders");
+  const inputs = {};
+  CRIT.forEach((cr) => {
+    const id = "w-" + cr;
+    const inp = hEl("input", { type: "range", id, min: 0, max: 100, step: 1, value: Math.round(presets.paper[cr] * 100) });
+    const out = hEl("output", { for: id });
+    box.append(hEl("div", { class: "slider" }, hEl("label", { for: id }, hEl("i", { class: "sw", style: `background:${CRIT_COLOR[cr]}` }), CRIT_ZH[cr]), out, inp));
+    inputs[cr] = { inp, out };
+    inp.addEventListener("input", update);
+  });
+  const sel = document.getElementById("variant");
+  DATA.variants.forEach((v) => sel.append(hEl("option", { value: v.key, text: v.label })));
+  sel.addEventListener("change", update);
+  document.querySelectorAll("[data-preset]").forEach((b) => b.addEventListener("click", () => {
+    const p = presets[b.dataset.preset];
+    CRIT.forEach((cr) => (inputs[cr].inp.value = Math.round(p[cr] * 100)));
+    update();
+  }));
+  let shareEl = null;
+  function shares(local) {
+    const N = 50, cnt = [0, 0, 0];
+    let n = 0;
+    for (let a = 0; a <= N; a++) for (let b = 0; b <= N - a; b++) for (let c = 0; c <= N - a - b; c++) {
+      const w = [a, b, c, N - a - b - c].map((q) => q / N);
+      const g = [0, 1, 2].map((j) => CRIT.reduce((acc, cr, k) => acc + w[k] * local[cr].w[j], 0));
+      cnt[g.indexOf(Math.max(...g))]++; n++;
+    }
+    return cnt.map((q) => q / n);
+  }
+  function update() {
+    const raw = CRIT.map((cr) => +inputs[cr].inp.value);
+    const sum = raw.reduce((a, b) => a + b, 0) || 1;
+    const w = {};
+    CRIT.forEach((cr, k) => { w[cr] = raw[k] / sum; inputs[cr].out.textContent = pct(w[cr], 1); });
+    const v = DATA.variants.find((x) => x.key === sel.value) || DATA.variants[0];
+    const rows = contributions(w, v.local);
+    stackbars("sb-lab", rows, 0.8);
+    const best = rows.reduce((a, b) => (b.total > a.total ? b : a));
+    document.getElementById("lab-winner").textContent = best.label + (best.sub === "續投" ? "（續投）" : "");
+    const sh = shares(v.local);
+    const el = document.getElementById("ch-lab-share");
+    el._draw = () => { el.replaceChildren(); hbars(el, Math.max(260, el.clientWidth), cands.map((p, j) => ({ label: short(p.name), v: sh[j], color: "var(--c-ahp)" })),
+      { min: 0, max: 1, ticks: [0, 0.25, 0.5, 0.75, 1], tickFmt: (t) => pct(t, 0), fmt: (q) => pct(q, 1), rowH: 34 }); };
+    if (!shareEl) { shareEl = el; el._w = Math.round(el.clientWidth); ro.observe(el); }
+    el._draw();
+  }
+  update();
+})();
+
+/* rank reversal */
+(function reversal() {
+  const R = DATA.rank_reversal, three = cands.map((p) => p.name);
+  const order = (sc, names) => [...names].sort((a, b) => sc[b] - sc[a]);
+  const baseOrder = order(R.base, three);
+  let idx = R.cases.findIndex((c) => order(c.scores, three).join() !== baseOrder.join());
+  if (idx < 0) idx = 0;
+  const chips = document.getElementById("rr-chips");
+  const flips = R.cases.filter((c) => order(c.scores, three).join() !== baseOrder.join()).length;
+  document.getElementById("rr-sum").textContent = `8 位可加入的牛棚中，有 ${flips} 位會讓原本三人的順序改變（distributive 合成；改用 ideal 合成是 4 位）。`;
+  R.cases.forEach((c, i) => {
+    const b = hEl("button", { class: "chip-btn", "aria-pressed": i === idx ? "true" : "false", text: "加入 " + short(c.added) });
+    b.addEventListener("click", () => { idx = i; chips.querySelectorAll("button").forEach((x, k) => x.setAttribute("aria-pressed", k === i ? "true" : "false")); draw(); });
+    chips.append(b);
+  });
+  const el = chart("ch-rr", (el, W) => render(el, W));
+  function draw() { el._draw(); }
+  function render(el, W) {
+    const c = R.cases[idx], after = order(c.scores, Object.keys(c.scores)), after3 = order(c.scores, three);
+    const flipped = after3.join() !== baseOrder.join();
+    const flag = document.getElementById("rr-flag");
+    flag.replaceChildren(hEl("span", { class: "flag" + (flipped ? " bad" : ""), text: flipped ? "原本三人的順序改變了" : "原本三人的順序不變" }));
+    const rowH = 40, top = 30, H = top + 4 * rowH + 6, colW = Math.min(220, (W - 80) / 2), xL = 0, xR = W - colW;
+    const svg = s("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}` }, el);
+    s("text", { x: xL, y: 14, "font-size": 12, "font-weight": 700, style: "fill:var(--muted)", text: "只有三人" }, svg);
+    s("text", { x: xR, y: 14, "font-size": 12, "font-weight": 700, style: "fill:var(--muted)", text: `加入 ${short(c.added)} 後` }, svg);
+    const yOf = (list, name) => top + list.indexOf(name) * rowH + rowH / 2;
+    three.forEach((nm) => {
+      const moved = baseOrder.indexOf(nm) !== after3.indexOf(nm);
+      s("line", { x1: xL + colW + 4, y1: yOf(baseOrder, nm), x2: xR - 6, y2: yOf(after, nm), style: `stroke:${moved && flipped ? "var(--accent)" : "var(--axis)"};stroke-width:${moved && flipped ? 2.5 : 1.5}` }, svg);
+    });
+    const item = (x, list, sc, nm) => {
+      const y = yOf(list, nm), isNew = nm === c.added;
+      const g = s("g", { role: "img", "aria-label": `${short(nm)} 第 ${list.indexOf(nm) + 1} 名 ${sc[nm].toFixed(3)}` }, svg);
+      s("rect", { x, y: y - 15, width: colW, height: 30, rx: 5, style: `fill:${isNew ? "var(--div-mid)" : "var(--surface)"};stroke:var(--rule)` }, g);
+      s("text", { x: x + 10, y: y + 5, "font-size": 12.5, "font-weight": 700, style: "fill:var(--ink)", text: `${list.indexOf(nm) + 1}. ${short(nm)}${isNew ? "（新加入）" : ""}` }, g);
+      s("text", { x: x + colW - 10, y: y + 5, "text-anchor": "end", "font-size": 12, style: "fill:var(--ink-2)", text: sc[nm].toFixed(3) }, g);
+      bindTip(g, () => [sc[nm].toFixed(3), `${short(nm)} 的 AHP 全域權重`]);
+    };
+    baseOrder.forEach((nm) => item(xL, baseOrder, R.base, nm));
+    after.forEach((nm) => item(xR, after, c.scores, nm));
+  }
+})();
+
+/* CR chart */
+chart("ch-cr", (el, W) => hbars(el, W, [
+  { label: "3 位候選", v: DATA.e2.cr_share[3], color: "var(--c-ahp)" },
+  { label: "4 位候選", v: DATA.e2.cr_share[4], color: "var(--c-ahp)" },
+  { label: "5 位候選", v: DATA.e2.cr_share[5], color: "var(--c-ahp)" },
+  { label: "全季回測", sub: "至少一個矩陣不合格", v: DATA.season.cr_bad, color: "var(--c-ahp)" },
+], { min: 0, max: 1, ticks: [0, 0.25, 0.5, 0.75, 1], tickFmt: (t) => pct(t, 0), fmt: (v) => pct(v, 1), rowH: 42 }));
+
+/* season */
+(function season() {
+  const S = DATA.season, tiles = document.getElementById("tiles-season");
+  [[S.games.toLocaleString(), "場比賽（AL 主場）"], [S.decisions.toLocaleString(), "個決策點"], [S.changes.toLocaleString(), "次實際換投"], [pct(S.change_rate), "換投率（每個打席）"]]
+    .forEach(([v, l]) => tiles.append(hEl("div", { class: "tile" }, hEl("div", { class: "v", text: v }), hEl("div", { class: "l", text: l }))));
+
+  const inn = DATA.season_by_inning;
+  const lg = document.getElementById("lg-inn");
+  const ser = [
+    { name: "AHP 說換", color: "var(--c-ahp)", values: inn.map((r) => r.ahp), dy: -4 },
+    { name: "Markov 說換", color: "var(--c-mk)", values: inn.map((r) => r.markov), dy: 10 },
+    { name: "總教練實際換", color: "var(--ink-2)", values: inn.map((r) => r.actual) },
+  ];
+  ser.forEach((x) => lg.append(hEl("span", {}, hEl("i", { class: "sw line", style: `background:${x.color}` }), x.name)));
+  chart("ch-inn", (el, W) => lines(el, W, { x: inn.map((r) => r.inning), series: ser, yMax: 1, yTicks: [0, 0.25, 0.5, 0.75, 1],
+    fmt: (v, d) => pct(v, d ? 1 : 0), xName: (x) => `第 ${x} 局`, aria: "各局說要換的比例折線圖" }));
+  table("tb-inn", ["局", "打席數", "總教練實際換", "AHP 說換", "Markov 說換"], inn.map((r) => [r.inning, r.n.toLocaleString(), pct(r.actual), pct(r.ahp), pct(r.markov)]));
+
+  chart("ch-auc", (el, W) => dots(el, W, [
+    { label: "AHP", ...E3.auc.ahp, color: "var(--c-ahp)" },
+    { label: "Markov", ...E3.auc.mk, color: "var(--c-mk)" },
+    { label: "只看先發用球數", ...E3.auc.pitch, color: "var(--c-ref-2)" },
+  ], { min: 0.45, max: 0.85, ticks: [0.5, 0.6, 0.7, 0.8], tickFmt: (t) => t.toFixed(1), fmt: (v) => v.toFixed(3), ref: 0.5, refLabel: "亂猜" }));
+
+  chart("ch-top1", (el, W) => hbars(el, W, [
+    { label: "隨機猜", v: E3.top1.random, color: "var(--c-ref)" },
+    { label: "Markov", ...E3.top1.mk, color: "var(--c-mk)" },
+    { label: "AHP", ...E3.top1.ahp, color: "var(--c-ahp)" },
+    { label: "左右 + ERA 法則", sub: "先挑有左右優勢的，再挑 ERA 最低", ...E3.top1.simple, color: "var(--c-ref-2)" },
+  ], { min: 0, max: 0.35, ticks: [0, 0.1, 0.2, 0.3], tickFmt: (t) => pct(t, 0), fmt: (v) => pct(v, 1), rowH: 44 }));
+
+  chart("ch-rho", (el, W) => dots(el, W, [
+    { label: "AHP", ...E3.rho.ahp, color: "var(--c-ahp)" },
+    { label: "Markov（只比投手）", ...E3.rho.mkr, color: "var(--c-mk)" },
+    { label: "Markov（含打線）", ...E3.rho.mk, color: "var(--c-mk)" },
+  ], { min: -0.08, max: 0.02, ticks: [-0.08, -0.06, -0.04, -0.02, 0], tickFmt: (t) => t.toFixed(2), fmt: (v) => v.toFixed(3), ref: 0, refLabel: "無關" }));
+
+  const q = E3.quint, lq = document.getElementById("lg-q");
+  const qs = [{ name: "AHP", color: "var(--c-ahp)", values: q.ahp }, { name: "Markov（只比投手）", color: "var(--c-mk)", values: q.mkr }];
+  qs.forEach((x) => lq.append(hEl("span", {}, hEl("i", { class: "sw", style: `background:${x.color}` }), x.name)));
+  chart("ch-q", (el, W) => columns(el, W, { cats: ["1", "2", "3", "4", "5"], series: qs, yMin: -0.08, yMax: 0.12, yTicks: [-0.05, 0, 0.05, 0.1],
+    fmt: (v, full) => (v > 0 ? "+" : "") + v.toFixed(full ? 3 : 2), catName: (c) => `第 ${c} 組（${c === "1" ? "評價最差" : c === "5" ? "評價最好" : "中間"}）` }));
+  table("tb-q", ["五分位", "AHP", "Markov 只比投手", "Markov 含打線"], [0, 1, 2, 3, 4].map((i) => [String(i + 1), q.ahp[i].toFixed(3), q.mkr[i].toFixed(3), q.mk[i].toFixed(3)]));
+
+  const C = E3.conc;
+  chart("ch-conc", (el, W) => hbars(el, W, [
+    { label: "總教練實際", v: C.manager, color: "var(--ink-2)" },
+    { label: "左右 + ERA 法則", v: C.simple, color: "var(--c-ref-2)" },
+    { label: "AHP", v: C.ahp, color: "var(--c-ahp)" },
+    { label: "Markov", v: C.mk, color: "var(--c-mk)" },
+  ], { min: 0, max: 0.8, ticks: [0, 0.2, 0.4, 0.6, 0.8], tickFmt: (t) => pct(t, 0), fmt: (v) => pct(v, 1) }));
+  const U = document.getElementById("units-same");
+  [["總教練實際", E3.same.manager], ["左右 + ERA 法則", E3.same.simple], ["AHP", E3.same.ahp], ["Markov", E3.same.mk]].forEach(([nm, k]) => {
+    const dotsEl = hEl("div", { class: "u-dots", role: "img", "aria-label": `${nm}：30 隊中 ${k} 隊相同` });
+    for (let i = 0; i < 30; i++) dotsEl.append(hEl("i", { class: i < k ? "on" : "" }));
+    U.append(hEl("div", { class: "u-row" }, hEl("b", { text: nm }), dotsEl, hEl("span", { text: `${k}/30`, style: "text-align:right;font-weight:700" })));
+  });
+})();
+
+/* scorecard */
+(function cards() {
+  const list = [
+    { name: "模型 1 · 影響圖", role: "把換投的考量因素與關係畫出來", state: ["ok", "可當檢查表"],
+      pro: ["38 個因素列得很完整：打者、板凳代打、局勢、疲勞、牛棚休息、賽程", "分成 4 群，直接成為 AHP 的層級"],
+      con: ["有 8 個循環，不是正式的影響圖，無法求解", "沒有機率、沒有價值節點；箭頭關係 AHP 完全沒用上", "左右手拆成 9 個節點，後面會重複計分"] },
+    { name: "模型 2 · AHP 引擎", role: "兩兩比較 → 特徵向量權重 → 一致性檢查 → 合成", state: ["mid", "方法可用，但小心反轉"],
+      pro: ["標準、透明，每一步都查得到", "每個決策約 1.8 ms", "能把總教練的主觀偏好量化，賽前準備好重複用"],
+      con: ["排序反轉：多列一位候選，8 次有 3 次改變原本順序", "輸出只是相對權重，不能校準，也說不出能多贏多少", "假設各準則獨立，但左右、疲勞、局勢會互相影響"] },
+    { name: "模型 3 · 文獻頻率權重", role: "用被論文提到的次數決定準則份量", state: ["no", "不建議"],
+      pro: ["來源明確、可重現", "計算簡單，和論文數字完全一致"],
+      con: ["被提到幾次不等於對勝負多重要", "換算把 21/31/29/19% 扭成 12.5/37.5/37.5/12.5%", "權重不隨局勢變；實際上權重幾乎不影響答案"] },
+    { name: "模型 4 · Pugh chart", role: "每位候選在每個子準則給 +1 / 0 / −1", state: ["no", "不建議"],
+      pro: ["直觀，教練一看就懂", "能放進難量化的因素，不知道就給 0"],
+      con: ["只有 +1/0/−1，丟掉差距大小", "「算平均」的門檻決定了答案", "換算出的矩陣先天不一致：全季 84% 的決策點不合格"] },
+    { name: "組合後的 AHP 換投模型", role: "論文主模型：模型 1–4 串起來", state: ["no", "不適合當決策引擎"],
+      pro: ["決策過程有紀律、每一步都能解釋", "換誰比亂猜好（26% vs 18.5%）", "評價與實際失分有微弱但顯著的關聯"],
+      con: ["重現不了論文案例；關鍵評分沒公開", "換投時機 AUC 0.588，遠不如只看用球數的 0.804", "不懂牛棚角色；沒贏過左右 + ERA 法則"] },
+    { name: "模型 5 · Markov 基準", role: "Hirotsu & Wright 式：24 狀態、左右對決、勝率", state: ["ok", "較可靠，需補保留價值"],
+      pro: ["校準良好：每半局 0.528 分（實際 0.520）", "輸出期望失分與勝率，能用實際結果驗證（MSE、Brier 都比 RE24 好）", "只算到半局結束時很快（12.9 ms）"],
+      con: ["短視：65% 的換投推薦同一人，6 局就用掉終結者", "換投時機也不準（AUC 0.595）：用球數、今天狀況沒進模型", "預測改善真實但很小（MSE 只改善 0.008）"] },
+  ];
+  const box = document.getElementById("cards");
+  list.forEach((m) => {
+    const ul = (items) => hEl("ul", {}, ...items.map((t) => hEl("li", { text: t })));
+    box.append(hEl("article", { class: "card" },
+      hEl("header", {}, hEl("div", {}, hEl("h3", { text: m.name }), hEl("div", { class: "role", text: m.role })), hEl("span", { class: "state " + m.state[0] }, hEl("i"), m.state[1])),
+      hEl("div", {}, hEl("h4", { text: "優點" }), ul(m.pro)),
+      hEl("div", {}, hEl("h4", { text: "缺點" }), ul(m.con))));
+  });
+})();
+</script>

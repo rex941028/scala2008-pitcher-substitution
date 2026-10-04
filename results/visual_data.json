@@ -1,0 +1,1617 @@
+{
+ "weights": {
+  "criteria": [
+   "State",
+   "Batter",
+   "Pitcher",
+   "Bullpen"
+  ],
+  "totals": {
+   "State": 7.0,
+   "Batter": 10.5,
+   "Pitcher": 10.0,
+   "Bullpen": 6.5
+  },
+  "literature": {
+   "State": 0.2059,
+   "Batter": 0.3088,
+   "Pitcher": 0.2941,
+   "Bullpen": 0.1912
+  },
+  "paper": {
+   "State": 0.125,
+   "Batter": 0.375,
+   "Pitcher": 0.375,
+   "Bullpen": 0.125
+  },
+  "paper_CR": 0.0,
+  "round": {
+   "State": 0.2463,
+   "Batter": 0.2894,
+   "Pitcher": 0.2894,
+   "Bullpen": 0.175
+  },
+  "round_CR": 0.0225,
+  "exact": {
+   "State": 0.2059,
+   "Batter": 0.3088,
+   "Pitcher": 0.2941,
+   "Bullpen": 0.1912
+  },
+  "exact_CR": -0.0
+ },
+ "case": {
+  "batter": "Mike Lowell",
+  "batter_bats": "R",
+  "on_deck": "Willie Harris",
+  "on_deck_bats": "L",
+  "bench": [
+   "Josh Bard (B)",
+   "Alex Cora (L)",
+   "Dustan Mohr (R)",
+   "Wily Mo Pena (R)",
+   "J.T. Snow (L)",
+   "Adam Stern (L)"
+  ],
+  "fld_lead": 2,
+  "outs": 0,
+  "bases": 0,
+  "pitches_today": 98,
+  "bf_today": 24,
+  "onbase_today": 12,
+  "runs_today": 2,
+  "typical_pitches": 96,
+  "pitchers": [
+   {
+    "id": "westj001",
+    "name": "Jake Westbrook",
+    "throws": "R",
+    "era": 4.56,
+    "avg_vs_L": 0.269,
+    "avg_vs_R": 0.256,
+    "obp": 0.312,
+    "dera_L": 4.73,
+    "dera_R": 4.12,
+    "days_rest": 5
+   },
+   {
+    "id": "davij005",
+    "name": "Jason Davis",
+    "throws": "R",
+    "era": 4.34,
+    "avg_vs_L": 0.274,
+    "avg_vs_R": 0.267,
+    "obp": 0.341,
+    "dera_L": 5.4,
+    "dera_R": 4.81,
+    "days_rest": 1
+   },
+   {
+    "id": "saues001",
+    "name": "Scott Sauerbeck",
+    "throws": "L",
+    "era": 4.17,
+    "avg_vs_L": 0.237,
+    "avg_vs_R": 0.272,
+    "obp": 0.347,
+    "dera_L": 4.23,
+    "dera_R": 5.53,
+    "days_rest": 2
+   }
+  ],
+  "actual": "Jason Davis",
+  "runs_rest": 1,
+  "pugh": [
+   {
+    "criterion": "State",
+    "node": 12,
+    "label": "上/下半局",
+    "ratings": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "criterion": "State",
+    "node": 13,
+    "label": "局數",
+    "ratings": [
+     1,
+     0,
+     0
+    ]
+   },
+   {
+    "criterion": "State",
+    "node": 14,
+    "label": "主/客場",
+    "ratings": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "criterion": "State",
+    "node": 15,
+    "label": "領先/落後分數",
+    "ratings": [
+     -1,
+     0,
+     0
+    ]
+   },
+   {
+    "criterion": "State",
+    "node": 16,
+    "label": "領先或落後",
+    "ratings": [
+     -1,
+     0,
+     0
+    ]
+   },
+   {
+    "criterion": "State",
+    "node": 17,
+    "label": "出局數",
+    "ratings": [
+     0,
+     0,
+     1
+    ]
+   },
+   {
+    "criterion": "State",
+    "node": 18,
+    "label": "上個半局發生的事",
+    "ratings": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "criterion": "State",
+    "node": 19,
+    "label": "壘上跑者",
+    "ratings": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "criterion": "Batter",
+    "node": 3,
+    "label": "板凳打者慣用手",
+    "ratings": [
+     -1,
+     -1,
+     -1
+    ]
+   },
+   {
+    "criterion": "Batter",
+    "node": 4,
+    "label": "板凳打者打擊率",
+    "ratings": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "criterion": "Batter",
+    "node": 5,
+    "label": "板凳打者左右投偏好",
+    "ratings": [
+     -1,
+     -1,
+     -1
+    ]
+   },
+   {
+    "criterion": "Batter",
+    "node": 6,
+    "label": "對手可派的代打",
+    "ratings": [
+     -1,
+     -1,
+     1
+    ]
+   },
+   {
+    "criterion": "Batter",
+    "node": 7,
+    "label": "下一棒打者",
+    "ratings": [
+     -1,
+     -1,
+     1
+    ]
+   },
+   {
+    "criterion": "Batter",
+    "node": 8,
+    "label": "預定打者慣用手",
+    "ratings": [
+     1,
+     1,
+     -1
+    ]
+   },
+   {
+    "criterion": "Batter",
+    "node": 10,
+    "label": "預定打者左右投偏好",
+    "ratings": [
+     0,
+     0,
+     -1
+    ]
+   },
+   {
+    "criterion": "Batter",
+    "node": 11,
+    "label": "預定打者打擊率",
+    "ratings": [
+     1,
+     1,
+     1
+    ]
+   },
+   {
+    "criterion": "Pitcher",
+    "node": 21,
+    "label": "投手慣用手",
+    "ratings": [
+     1,
+     1,
+     -1
+    ]
+   },
+   {
+    "criterion": "Pitcher",
+    "node": 22,
+    "label": "投手對左右打防禦率",
+    "ratings": [
+     1,
+     0,
+     0
+    ]
+   },
+   {
+    "criterion": "Pitcher",
+    "node": 23,
+    "label": "疲勞",
+    "ratings": [
+     -1,
+     1,
+     1
+    ]
+   },
+   {
+    "criterion": "Pitcher",
+    "node": 24,
+    "label": "是否受傷",
+    "ratings": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "criterion": "Pitcher",
+    "node": 25,
+    "label": "今日表現（失分）",
+    "ratings": [
+     -1,
+     0,
+     0
+    ]
+   },
+   {
+    "criterion": "Pitcher",
+    "node": 26,
+    "label": "投手防禦率",
+    "ratings": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "criterion": "Pitcher",
+    "node": 27,
+    "label": "投手一般數據",
+    "ratings": [
+     1,
+     -1,
+     -1
+    ]
+   },
+   {
+    "criterion": "Pitcher",
+    "node": 28,
+    "label": "場上投手",
+    "ratings": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "criterion": "Pitcher",
+    "node": 30,
+    "label": "投手 DERA",
+    "ratings": [
+     1,
+     0,
+     -1
+    ]
+   },
+   {
+    "criterion": "Bullpen",
+    "node": 31,
+    "label": "牛棚休息",
+    "ratings": [
+     1,
+     0,
+     1
+    ]
+   },
+   {
+    "criterion": "Bullpen",
+    "node": 32,
+    "label": "牛棚對左右打防禦率",
+    "ratings": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "criterion": "Bullpen",
+    "node": 34,
+    "label": "牛棚防禦率",
+    "ratings": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "criterion": "Bullpen",
+    "node": 35,
+    "label": "牛棚 DERA",
+    "ratings": [
+     0,
+     0,
+     -1
+    ]
+   },
+   {
+    "criterion": "Bullpen",
+    "node": 36,
+    "label": "先發輪值",
+    "ratings": [
+     1,
+     1,
+     -1
+    ]
+   },
+   {
+    "criterion": "Bullpen",
+    "node": 37,
+    "label": "後續賽程",
+    "ratings": [
+     1,
+     0,
+     0
+    ]
+   },
+   {
+    "criterion": "Bullpen",
+    "node": 38,
+    "label": "牛棚一般數據",
+    "ratings": [
+     0,
+     -1,
+     -1
+    ]
+   }
+  ],
+  "markov": [
+   {
+    "name": "Jake Westbrook",
+    "exp_runs": 0.481,
+    "p0": 0.745,
+    "wp": 0.8006,
+    "dist": [
+     0.7453,
+     0.1388,
+     0.0601,
+     0.0558
+    ]
+   },
+   {
+    "name": "Jason Davis",
+    "exp_runs": 0.56,
+    "p0": 0.723,
+    "wp": 0.7902,
+    "dist": [
+     0.7232,
+     0.1401,
+     0.0661,
+     0.0707
+    ]
+   },
+   {
+    "name": "Scott Sauerbeck",
+    "exp_runs": 0.58,
+    "p0": 0.715,
+    "wp": 0.7877,
+    "dist": [
+     0.715,
+     0.1417,
+     0.0699,
+     0.0734
+    ]
+   }
+  ]
+ },
+ "variants": [
+  {
+   "key": "base",
+   "label": "基準：本研究預先定好的評分規則",
+   "local": {
+    "State": {
+     "w": [
+      0.1047,
+      0.2583,
+      0.637
+     ],
+     "CR": 0.033,
+     "totals": [
+      -1,
+      0,
+      1
+     ]
+    },
+    "Batter": {
+     "w": [
+      0.2,
+      0.2,
+      0.6
+     ],
+     "CR": 0.0,
+     "totals": [
+      -2,
+      -2,
+      -1
+     ]
+    },
+    "Pitcher": {
+     "w": [
+      0.633,
+      0.3043,
+      0.0627
+     ],
+     "CR": 0.117,
+     "totals": [
+      2,
+      1,
+      -2
+     ]
+    },
+    "Bullpen": {
+     "w": [
+      0.772,
+      0.1734,
+      0.0545
+     ],
+     "CR": 0.18,
+     "totals": [
+      3,
+      0,
+      -2
+     ]
+    }
+   }
+  },
+  {
+   "key": "bp0",
+   "label": "場上投手在牛棚準則不加分（31/36/37 給 0）",
+   "local": {
+    "State": {
+     "w": [
+      0.1047,
+      0.2583,
+      0.637
+     ],
+     "CR": 0.033,
+     "totals": [
+      -1,
+      0,
+      1
+     ]
+    },
+    "Batter": {
+     "w": [
+      0.2,
+      0.2,
+      0.6
+     ],
+     "CR": 0.0,
+     "totals": [
+      -2,
+      -2,
+      -1
+     ]
+    },
+    "Pitcher": {
+     "w": [
+      0.633,
+      0.3043,
+      0.0627
+     ],
+     "CR": 0.117,
+     "totals": [
+      2,
+      1,
+      -2
+     ]
+    },
+    "Bullpen": {
+     "w": [
+      0.4545,
+      0.4545,
+      0.0909
+     ],
+     "CR": 0.0,
+     "totals": [
+      0,
+      0,
+      -2
+     ]
+    }
+   }
+  },
+  {
+   "key": "state0",
+   "label": "比賽狀態的情境拆分全給 0（樣本太小）",
+   "local": {
+    "State": {
+     "w": [
+      0.3333,
+      0.3333,
+      0.3333
+     ],
+     "CR": 0.0,
+     "totals": [
+      0,
+      0,
+      0
+     ]
+    },
+    "Batter": {
+     "w": [
+      0.2,
+      0.2,
+      0.6
+     ],
+     "CR": 0.0,
+     "totals": [
+      -2,
+      -2,
+      -1
+     ]
+    },
+    "Pitcher": {
+     "w": [
+      0.633,
+      0.3043,
+      0.0627
+     ],
+     "CR": 0.117,
+     "totals": [
+      2,
+      1,
+      -2
+     ]
+    },
+    "Bullpen": {
+     "w": [
+      0.772,
+      0.1734,
+      0.0545
+     ],
+     "CR": 0.18,
+     "totals": [
+      3,
+      0,
+      -2
+     ]
+    }
+   }
+  },
+  {
+   "key": "bench0",
+   "label": "對手板凳代打節點 3–6 全給 0",
+   "local": {
+    "State": {
+     "w": [
+      0.1047,
+      0.2583,
+      0.637
+     ],
+     "CR": 0.033,
+     "totals": [
+      -1,
+      0,
+      1
+     ]
+    },
+    "Batter": {
+     "w": [
+      0.4286,
+      0.4286,
+      0.1429
+     ],
+     "CR": -0.0,
+     "totals": [
+      1,
+      1,
+      0
+     ]
+    },
+    "Pitcher": {
+     "w": [
+      0.633,
+      0.3043,
+      0.0627
+     ],
+     "CR": 0.117,
+     "totals": [
+      2,
+      1,
+      -2
+     ]
+    },
+    "Bullpen": {
+     "w": [
+      0.772,
+      0.1734,
+      0.0545
+     ],
+     "CR": 0.18,
+     "totals": [
+      3,
+      0,
+      -2
+     ]
+    }
+   }
+  },
+  {
+   "key": "linear",
+   "label": "Pugh 差距改線性換算（差 1→2、差 2→3…）",
+   "local": {
+    "State": {
+     "w": [
+      0.1634,
+      0.297,
+      0.5396
+     ],
+     "CR": 0.008,
+     "totals": [
+      -1,
+      0,
+      1
+     ]
+    },
+    "Batter": {
+     "w": [
+      0.25,
+      0.25,
+      0.5
+     ],
+     "CR": 0.0,
+     "totals": [
+      -2,
+      -2,
+      -1
+     ]
+    },
+    "Pitcher": {
+     "w": [
+      0.5695,
+      0.3331,
+      0.0974
+     ],
+     "CR": 0.021,
+     "totals": [
+      2,
+      1,
+      -2
+     ]
+    },
+    "Bullpen": {
+     "w": [
+      0.691,
+      0.2176,
+      0.0914
+     ],
+     "CR": 0.046,
+     "totals": [
+      3,
+      0,
+      -2
+     ]
+    }
+   }
+  },
+  {
+   "key": "tol05",
+   "label": "「平均」的容忍帶 ×0.5",
+   "local": {
+    "State": {
+     "w": [
+      0.2053,
+      0.0436,
+      0.7511
+     ],
+     "CR": 0.376,
+     "totals": [
+      1,
+      -4,
+      5
+     ]
+    },
+    "Batter": {
+     "w": [
+      0.3333,
+      0.3333,
+      0.3333
+     ],
+     "CR": 0.0,
+     "totals": [
+      -2,
+      -2,
+      -2
+     ]
+    },
+    "Pitcher": {
+     "w": [
+      0.4667,
+      0.4667,
+      0.0667
+     ],
+     "CR": 0.0,
+     "totals": [
+      1,
+      1,
+      -3
+     ]
+    },
+    "Bullpen": {
+     "w": [
+      0.772,
+      0.1734,
+      0.0545
+     ],
+     "CR": 0.18,
+     "totals": [
+      3,
+      -1,
+      -3
+     ]
+    }
+   }
+  },
+  {
+   "key": "tol2",
+   "label": "「平均」的容忍帶 ×2",
+   "local": {
+    "State": {
+     "w": [
+      0.3333,
+      0.3333,
+      0.3333
+     ],
+     "CR": 0.0,
+     "totals": [
+      0,
+      0,
+      0
+     ]
+    },
+    "Batter": {
+     "w": [
+      0.2,
+      0.2,
+      0.6
+     ],
+     "CR": 0.0,
+     "totals": [
+      -2,
+      -2,
+      -1
+     ]
+    },
+    "Pitcher": {
+     "w": [
+      0.1884,
+      0.7306,
+      0.081
+     ],
+     "CR": 0.056,
+     "totals": [
+      0,
+      2,
+      -1
+     ]
+    },
+    "Bullpen": {
+     "w": [
+      0.7306,
+      0.1884,
+      0.081
+     ],
+     "CR": 0.056,
+     "totals": [
+      3,
+      1,
+      0
+     ]
+    }
+   }
+  }
+ ],
+ "rank_reversal": {
+  "base": {
+   "Jake Westbrook": 0.422,
+   "Jason Davis": 0.2431,
+   "Scott Sauerbeck": 0.335
+  },
+  "cases": [
+   {
+    "added": "Rafael Betancourt",
+    "scores": {
+     "Jake Westbrook": 0.1668,
+     "Jason Davis": 0.1196,
+     "Scott Sauerbeck": 0.2229,
+     "Rafael Betancourt": 0.4906
+    }
+   },
+   {
+    "added": "Danny Graves",
+    "scores": {
+     "Jake Westbrook": 0.3775,
+     "Jason Davis": 0.2418,
+     "Scott Sauerbeck": 0.288,
+     "Danny Graves": 0.0927
+    }
+   },
+   {
+    "added": "Jeremy Guthrie",
+    "scores": {
+     "Jake Westbrook": 0.2988,
+     "Jason Davis": 0.1675,
+     "Scott Sauerbeck": 0.2737,
+     "Jeremy Guthrie": 0.26
+    }
+   },
+   {
+    "added": "Matt Miller",
+    "scores": {
+     "Jake Westbrook": 0.2186,
+     "Jason Davis": 0.129,
+     "Scott Sauerbeck": 0.2264,
+     "Matt Miller": 0.4259
+    }
+   },
+   {
+    "added": "Guillermo Mota",
+    "scores": {
+     "Jake Westbrook": 0.2389,
+     "Jason Davis": 0.1375,
+     "Scott Sauerbeck": 0.2273,
+     "Guillermo Mota": 0.3963
+    }
+   },
+   {
+    "added": "Rafael Perez",
+    "scores": {
+     "Jake Westbrook": 0.3497,
+     "Jason Davis": 0.1913,
+     "Scott Sauerbeck": 0.2276,
+     "Rafael Perez": 0.2314
+    }
+   },
+   {
+    "added": "Brian Slocum",
+    "scores": {
+     "Jake Westbrook": 0.3521,
+     "Jason Davis": 0.1869,
+     "Scott Sauerbeck": 0.2741,
+     "Brian Slocum": 0.1869
+    }
+   },
+   {
+    "added": "Bob Wickman",
+    "scores": {
+     "Jake Westbrook": 0.2095,
+     "Jason Davis": 0.1273,
+     "Scott Sauerbeck": 0.2269,
+     "Bob Wickman": 0.4364
+    }
+   }
+  ]
+ },
+ "diagram": {
+  "nodes": [
+   {
+    "id": 1,
+    "en": "Pitcher selection",
+    "zh": "投手選擇（目標）",
+    "type": "decision",
+    "cluster": 1
+   },
+   {
+    "id": 2,
+    "en": "Pitcher vs. batter matchups",
+    "zh": "投打對決",
+    "type": "chance",
+    "cluster": 2
+   },
+   {
+    "id": 3,
+    "en": "Bench batters' natural handedness",
+    "zh": "板凳打者慣用手",
+    "type": "chance",
+    "cluster": 9
+   },
+   {
+    "id": 4,
+    "en": "Bench batters' averages",
+    "zh": "板凳打者打擊率",
+    "type": "chance",
+    "cluster": 9
+   },
+   {
+    "id": 5,
+    "en": "Bench batters' handedness preference",
+    "zh": "板凳打者左右投偏好",
+    "type": "chance",
+    "cluster": 9
+   },
+   {
+    "id": 6,
+    "en": "Who the opposing team can PH",
+    "zh": "對手可派的代打",
+    "type": "chance",
+    "cluster": 9
+   },
+   {
+    "id": 7,
+    "en": "Next scheduled batter",
+    "zh": "下一棒打者",
+    "type": "chance",
+    "cluster": 9
+   },
+   {
+    "id": 8,
+    "en": "Scheduled batter handedness",
+    "zh": "預定打者慣用手",
+    "type": "chance",
+    "cluster": 9
+   },
+   {
+    "id": 9,
+    "en": "Scheduled batter's situation",
+    "zh": "預定打者狀況",
+    "type": "chance",
+    "cluster": 9
+   },
+   {
+    "id": 10,
+    "en": "Scheduled batter's handedness preference",
+    "zh": "預定打者左右投偏好",
+    "type": "chance",
+    "cluster": 9
+   },
+   {
+    "id": 11,
+    "en": "Scheduled batter's average",
+    "zh": "預定打者打擊率",
+    "type": "chance",
+    "cluster": 9
+   },
+   {
+    "id": 12,
+    "en": "Top or bottom",
+    "zh": "上/下半局",
+    "type": "chance",
+    "cluster": 20
+   },
+   {
+    "id": 13,
+    "en": "Inning",
+    "zh": "局數",
+    "type": "chance",
+    "cluster": 20
+   },
+   {
+    "id": 14,
+    "en": "Home or away",
+    "zh": "主/客場",
+    "type": "chance",
+    "cluster": 20
+   },
+   {
+    "id": 15,
+    "en": "Number runs ahead / behind",
+    "zh": "領先/落後分數",
+    "type": "chance",
+    "cluster": 20
+   },
+   {
+    "id": 16,
+    "en": "Behind or ahead",
+    "zh": "領先或落後",
+    "type": "chance",
+    "cluster": 20
+   },
+   {
+    "id": 17,
+    "en": "Number of outs",
+    "zh": "出局數",
+    "type": "chance",
+    "cluster": 20
+   },
+   {
+    "id": 18,
+    "en": "Happened in previous half inning",
+    "zh": "上個半局發生的事",
+    "type": "chance",
+    "cluster": 20
+   },
+   {
+    "id": 19,
+    "en": "Runners on",
+    "zh": "壘上跑者",
+    "type": "chance",
+    "cluster": 20
+   },
+   {
+    "id": 20,
+    "en": "State of the game",
+    "zh": "比賽狀態",
+    "type": "chance",
+    "cluster": 20
+   },
+   {
+    "id": 21,
+    "en": "Handedness of pitcher",
+    "zh": "投手慣用手",
+    "type": "chance",
+    "cluster": 29
+   },
+   {
+    "id": 22,
+    "en": "Pitcher's ERA vs. handedness",
+    "zh": "投手對左右打防禦率",
+    "type": "chance",
+    "cluster": 29
+   },
+   {
+    "id": 23,
+    "en": "Tiredness",
+    "zh": "疲勞",
+    "type": "chance",
+    "cluster": 29
+   },
+   {
+    "id": 24,
+    "en": "Injured?",
+    "zh": "是否受傷",
+    "type": "chance",
+    "cluster": 29
+   },
+   {
+    "id": 25,
+    "en": "How faring: number runs given up",
+    "zh": "今日表現（失分）",
+    "type": "chance",
+    "cluster": 29
+   },
+   {
+    "id": 26,
+    "en": "Pitcher's ERA",
+    "zh": "投手防禦率",
+    "type": "chance",
+    "cluster": 29
+   },
+   {
+    "id": 27,
+    "en": "Pitcher's general numbers",
+    "zh": "投手一般數據",
+    "type": "chance",
+    "cluster": 29
+   },
+   {
+    "id": 28,
+    "en": "Pitcher in the game",
+    "zh": "場上投手",
+    "type": "decision",
+    "cluster": 29
+   },
+   {
+    "id": 29,
+    "en": "In-game pitcher's situation",
+    "zh": "場上投手狀況",
+    "type": "chance",
+    "cluster": 29
+   },
+   {
+    "id": 30,
+    "en": "Pitcher's DERA",
+    "zh": "投手 DERA",
+    "type": "chance",
+    "cluster": 29
+   },
+   {
+    "id": 31,
+    "en": "Bullpen rest",
+    "zh": "牛棚休息",
+    "type": "decision",
+    "cluster": 33
+   },
+   {
+    "id": 32,
+    "en": "Bullpen ERA vs. handedness",
+    "zh": "牛棚對左右打防禦率",
+    "type": "chance",
+    "cluster": 33
+   },
+   {
+    "id": 33,
+    "en": "Bullpen specialists available",
+    "zh": "可用牛棚專家",
+    "type": "decision",
+    "cluster": 33
+   },
+   {
+    "id": 34,
+    "en": "Bullpen ERAs",
+    "zh": "牛棚防禦率",
+    "type": "chance",
+    "cluster": 33
+   },
+   {
+    "id": 35,
+    "en": "Bullpen DERA",
+    "zh": "牛棚 DERA",
+    "type": "chance",
+    "cluster": 33
+   },
+   {
+    "id": 36,
+    "en": "Starting rotation",
+    "zh": "先發輪值",
+    "type": "decision",
+    "cluster": 33
+   },
+   {
+    "id": 37,
+    "en": "Upcoming schedule",
+    "zh": "後續賽程",
+    "type": "chance",
+    "cluster": 33
+   },
+   {
+    "id": 38,
+    "en": "Bullpen's general numbers",
+    "zh": "牛棚一般數據",
+    "type": "chance",
+    "cluster": 33
+   }
+  ],
+  "edges": [
+   [
+    1,
+    2
+   ],
+   [
+    2,
+    1
+   ],
+   [
+    3,
+    5
+   ],
+   [
+    3,
+    6
+   ],
+   [
+    4,
+    6
+   ],
+   [
+    5,
+    4
+   ],
+   [
+    5,
+    6
+   ],
+   [
+    6,
+    9
+   ],
+   [
+    7,
+    6
+   ],
+   [
+    8,
+    9
+   ],
+   [
+    8,
+    10
+   ],
+   [
+    9,
+    2
+   ],
+   [
+    9,
+    29
+   ],
+   [
+    10,
+    11
+   ],
+   [
+    11,
+    9
+   ],
+   [
+    12,
+    20
+   ],
+   [
+    13,
+    12
+   ],
+   [
+    13,
+    20
+   ],
+   [
+    14,
+    12
+   ],
+   [
+    14,
+    20
+   ],
+   [
+    15,
+    16
+   ],
+   [
+    15,
+    20
+   ],
+   [
+    16,
+    20
+   ],
+   [
+    17,
+    20
+   ],
+   [
+    18,
+    20
+   ],
+   [
+    19,
+    20
+   ],
+   [
+    20,
+    2
+   ],
+   [
+    21,
+    29
+   ],
+   [
+    22,
+    26
+   ],
+   [
+    22,
+    29
+   ],
+   [
+    23,
+    22
+   ],
+   [
+    23,
+    24
+   ],
+   [
+    23,
+    29
+   ],
+   [
+    24,
+    25
+   ],
+   [
+    24,
+    29
+   ],
+   [
+    25,
+    24
+   ],
+   [
+    25,
+    26
+   ],
+   [
+    25,
+    29
+   ],
+   [
+    26,
+    29
+   ],
+   [
+    26,
+    30
+   ],
+   [
+    27,
+    26
+   ],
+   [
+    28,
+    29
+   ],
+   [
+    29,
+    2
+   ],
+   [
+    29,
+    9
+   ],
+   [
+    29,
+    28
+   ],
+   [
+    29,
+    30
+   ],
+   [
+    30,
+    26
+   ],
+   [
+    30,
+    29
+   ],
+   [
+    31,
+    33
+   ],
+   [
+    32,
+    34
+   ],
+   [
+    33,
+    2
+   ],
+   [
+    34,
+    33
+   ],
+   [
+    34,
+    35
+   ],
+   [
+    35,
+    34
+   ],
+   [
+    36,
+    33
+   ],
+   [
+    37,
+    33
+   ],
+   [
+    37,
+    36
+   ],
+   [
+    38,
+    34
+   ]
+  ],
+  "two_way": [
+   [
+    1,
+    2
+   ],
+   [
+    9,
+    29
+   ],
+   [
+    24,
+    25
+   ],
+   [
+    26,
+    30
+   ],
+   [
+    28,
+    29
+   ],
+   [
+    29,
+    30
+   ],
+   [
+    34,
+    35
+   ]
+  ],
+  "cycles": [
+   [
+    1,
+    2
+   ],
+   [
+    9,
+    29
+   ],
+   [
+    24,
+    25
+   ],
+   [
+    26,
+    29,
+    30
+   ],
+   [
+    26,
+    30
+   ],
+   [
+    28,
+    29
+   ],
+   [
+    29,
+    30
+   ],
+   [
+    34,
+    35
+   ]
+  ],
+  "clusters": {
+   "9": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    10,
+    11
+   ],
+   "20": [
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+   ],
+   "29": [
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    30
+   ],
+   "33": [
+    31,
+    32,
+    34,
+    35,
+    36,
+    37,
+    38
+   ]
+  }
+ },
+ "season_by_inning": [
+  {
+   "inning": "6",
+   "n": 10050,
+   "actual": 0.0764,
+   "ahp": 0.9089,
+   "markov": 0.9388
+  },
+  {
+   "inning": "7",
+   "n": 9865,
+   "actual": 0.1387,
+   "ahp": 0.9051,
+   "markov": 0.9038
+  },
+  {
+   "inning": "8",
+   "n": 9755,
+   "actual": 0.1875,
+   "ahp": 0.8587,
+   "markov": 0.8435
+  },
+  {
+   "inning": "9",
+   "n": 7126,
+   "actual": 0.1939,
+   "ahp": 0.7359,
+   "markov": 0.6875
+  },
+  {
+   "inning": "10+",
+   "n": 1318,
+   "actual": 0.1684,
+   "ahp": 0.6631,
+   "markov": 0.5622
+  }
+ ],
+ "season": {
+  "games": 1132,
+  "decisions": 38114,
+  "changes": 5569,
+  "change_rate": 0.1461,
+  "ahp_sub": 0.8542,
+  "mk_sub": 0.8453,
+  "cr_bad": 0.8398
+ },
+ "timing": {
+  "ahp_ms": 1.796955552,
+  "markov_ms": 12.8824991787,
+  "errors": 0.0,
+  "games": 1134.0
+ }
+}
